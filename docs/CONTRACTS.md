@@ -50,6 +50,26 @@ Checked at claim and again at fill. Order of checks:
 | `maxSlippageBps` | 300 | 300 |
 | `maxDeviationBps` per market | 150 | 150 |
 
+## Tests
+
+`npm test -w contracts` runs 52 unit tests and 6 seeded random sequences (200 steps each). `npm run test:stress -w contracts` runs 25 × 400.
+
+| File | Covers |
+|---|---|
+| `orders.test.ts` | constructor rejects unsafe parameters and mismatched pools; prepaid fees; order validation; escrow per token; cancel by the owner any time (even while the market is closed) and by anyone after expiry; fee-on-transfer tokens |
+| `keepers.test.ts` | bond minimum and capacity; unbond rules; **no unbond while a claim is live**; claim exclusivity; capacity cap; odd-fee split; fill window; gate re-checked at fill; slippage limit; a dishonest router caught by the balance check; limit buy never pays above its limit; slashing on takeover, on `clearExpiredClaim` and on cancel; no penalty when the market closed mid-window |
+| `gate.test.ts` | every gate status, including a pre-Thanksgiving price that's still inside its heartbeat |
+| `marketHours.test.ts` | Solidity calendar vs the IANA time zone database |
+| `invariants.test.ts` | random sequences of placing, price moves, issuer pauses, weekend clock jumps, claims, fills, cancels, slashes, bond and fee changes, checked against an **independent reference model** after every step |
+
+Invariants checked after every random step:
+
+1. **User funds are never lost.** For each token, contract balance = `escrowed` = Σ open orders. A cancel refunds exactly the escrow and the fee. A fill delivers exactly `amountOut` ≥ the reference min-out to the owner.
+2. **No execution on a stale or paused feed.** Every successful claim and fill happened at a timestamp where the reference gate (time zone database calendar, flags, heartbeat, session start, band) was fresh.
+3. **Fees add up.** $WIF held = bonds + fee ledger. The fee ledger = balances + open reservations. Burned + paid = Σ filled fees, and burned = Σ ⌊fee/2⌋. $WIF supply falls only by fee burns + slashes.
+4. **No unbond while a claim is live.** The unbond attempt is checked against live claims. `activeClaims` equals the number of claimed open orders and never exceeds bond / slashAmount.
+5. Filled and cancelled are final states.
+
 ## Verified against
 
 - Live mainnet, Monday 2 Nov 2026 after the 01:00 UTC (EST) open: all 36 equity feeds pushed a round at about 01:00:30, so the gate opens on a normal Monday.

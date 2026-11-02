@@ -66,7 +66,7 @@ export async function deployFixture() {
   // Deploy stocks until we have one on each side of USDG, so both pool orientations are covered
   // (on mainnet SPY is token0 while NVDA and AAPL sit behind USDG).
   let low, high;
-  for (let i = 0; i < 12 && !(low && high); i++) {
+  for (let i = 0; i < 64 && !(low && high); i++) {
     const s = await viem.deployContract("MockStockToken", [`Stock ${i}`, `S${i}`]);
     if (BigInt(s.address) < BigInt(usdg.address)) low ??= s;
     else high ??= s;
@@ -126,5 +126,53 @@ export async function deployFixture() {
 }
 
 export type Fixture = Awaited<ReturnType<typeof deployFixture>>;
+
+export async function now(f: Fixture): Promise<bigint> {
+  return (await f.publicClient.getBlock()).timestamp;
+}
+
+/** Push a fresh feed round at `price8` for market 0 (SPY) or 1 (NVDA); the pool follows unless `poolPrice8` is given. */
+export async function setPrice(f: Fixture, market: 0 | 1, price8: bigint, opts: { updatedAt?: bigint; poolPrice8?: bigint } = {}) {
+  const feed = market === 0 ? f.spyFeed : f.nvdaFeed;
+  const pool = market === 0 ? f.spyPool : f.nvdaPool;
+  await feed.write.set([price8, opts.updatedAt ?? (await now(f))]);
+  await pool.write.setSqrtPriceX96([sqrtPriceFor(opts.poolPrice8 ?? price8, market === 0)]);
+}
+
+type Wallet = Fixture["alice"];
+
+export interface PlaceOpts {
+  account?: Wallet;
+  market?: number;
+  kind?: number;
+  amountIn?: bigint;
+  trigger?: bigint;
+  slippageBps?: number;
+  expiry?: bigint;
+  fee?: bigint;
+}
+
+/** Places an order with sensible defaults (SPY stop-loss, 1 share, trigger 740) and returns its id. */
+export async function place(f: Fixture, o: PlaceOpts = {}): Promise<bigint> {
+  const id = await f.lastbell.read.orderCount();
+  const kind = o.kind ?? Kind.StopLoss;
+  await f.lastbell.write.placeOrder(
+    [
+      o.market ?? 0,
+      kind,
+      o.amountIn ?? (kind === Kind.StopLoss ? STOCK("1") : USDG("500")),
+      o.trigger ?? usd("740"),
+      o.slippageBps ?? 100,
+      o.expiry ?? (await now(f)) + 86400n * 7n,
+      o.fee ?? PARAMS.minFee,
+    ],
+    { account: (o.account ?? f.alice).account },
+  );
+  return id;
+}
+
+export async function bondKeeper(f: Fixture, keeper: Wallet = f.keeper, amount = PARAMS.minBond) {
+  await f.lastbell.write.bond([amount], { account: keeper.account });
+}
 
 export const addr = (a: Address) => getAddress(a);

@@ -19,7 +19,14 @@ contract MockAggregator is IAggregatorV3 {
         _set(answer_, updatedAt_);
     }
 
+    bool public reverting;
+
+    function setReverting(bool value) external {
+        reverting = value;
+    }
+
     function latestRoundData() external view override returns (uint80, int256, uint256, uint256, uint80) {
+        require(!reverting, "feed down");
         return (_roundId, _answer, _updatedAt, _updatedAt, _roundId);
     }
 

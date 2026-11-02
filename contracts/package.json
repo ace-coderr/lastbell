@@ -6,12 +6,14 @@
   "scripts": {
     "build": "hardhat build",
     "typecheck": "hardhat build --quiet && tsc -p tsconfig.json",
-    "test": "hardhat test"
+    "test": "hardhat test",
+    "test:stress": "cross-env INVARIANT_SEEDS=25 INVARIANT_STEPS=400 hardhat test test/invariants.test.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "5.0.7",
     "@openzeppelin/contracts": "5.6.1",
     "@types/node": "^22.19.0",
+    "cross-env": "^7.0.3",
     "hardhat": "3.21.2",
     "typescript": "~5.9.3",
     "viem": "2.57.14"
