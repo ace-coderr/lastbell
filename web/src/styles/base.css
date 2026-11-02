@@ -620,3 +620,41 @@ a {
 .loading-note {
   margin: var(--sp-7) 0;
 }
+
+/* ---------------------------------------------------------------- region gate */
+
+.region-banner {
+  margin-top: var(--sp-4);
+}
+
+.region-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: grid;
+  place-items: center;
+  padding: 16px;
+  background: rgba(5, 6, 10, 0.72);
+  backdrop-filter: blur(6px);
+}
+
+.region-dialog {
+  max-width: 460px;
+  display: grid;
+  gap: var(--sp-3);
+  justify-items: start;
+}
+
+.region-dialog svg {
+  color: var(--brass);
+}
+
+.region-dialog h2 {
+  margin: 0;
+  font-size: var(--fs-xl);
+}
+
+.region-dialog p {
+  margin: 0;
+  color: var(--text-2);
+}

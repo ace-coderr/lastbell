@@ -5,11 +5,13 @@ import { useLastbellActions } from "./chain/actions.js";
 import { useLiveFlywheel, useLiveMarkets, useLiveOrders } from "./chain/live.js";
 import { BellMark } from "./components/Bell.js";
 import { MarketClock } from "./components/MarketClock.js";
+import { RegionGate } from "./components/RegionGate.js";
 import { NetworkBanner, WalletButton, useConnectWallet, useWalletState } from "./components/Wallet.js";
 import { Alert, Spinner } from "./components/icons.js";
 import { DEMO, LOCAL } from "./config.js";
 import { demoFlywheel, demoMarkets, demoOrders } from "./demo.js";
 import { demoClockOffset, useNow } from "./lib/useNow.js";
+import { readRegion } from "./region.js";
 import type { UiOrder } from "./model.js";
 import { FlywheelScreen } from "./screens/Flywheel.js";
 import { OrdersScreen } from "./screens/Orders.js";
@@ -29,6 +31,8 @@ const screenFromHash = (): Screen => {
 
 export function App() {
   const [clockOffset] = useState(() => (DEMO ? demoClockOffset() : 0));
+  const [region] = useState(readRegion);
+  const canOrder = region.status === "allowed";
   const now = useNow(clockOffset);
   const clock = marketClock(now);
   const [screen, setScreen] = useState<Screen>(screenFromHash);
@@ -94,6 +98,13 @@ export function App() {
   // ---------------------------------------------------------------- the ticket's main button, by wallet state
   const ticketAction = (d: OrderDraft | null): ReactNode => {
     const label = d ? (d.kind === "stop" ? "Place stop-loss" : "Place limit buy") : "Complete the order";
+    if (!canOrder) {
+      return (
+        <button className="btn btn-primary btn-lg" disabled>
+          {region.status === "blocked" ? "Not available in your region" : "Region not confirmed"}
+        </button>
+      );
+    }
     if (DEMO) {
       return (
         <button className="btn btn-primary btn-lg" disabled={!d} onClick={() => d && place(d)}>
@@ -179,6 +190,7 @@ export function App() {
             {!DEMO && <WalletButton />}
           </div>
         </header>
+        <RegionGate region={region} />
         {!DEMO && <NetworkBanner />}
 
         <main id="main">

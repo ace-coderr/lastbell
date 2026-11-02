@@ -8,7 +8,7 @@ Submissions close 12 Nov 2026, 17:30 UTC. Target submit 10 Nov. Feature freeze 9
 - [x] 4. Contract tests: 52 unit tests + seeded random sequences checked against an independent reference model (funds never lost, no execution on stale/paused feed, fees add up, no unbond with a live claim). Stress: 25 × 400 steps
 - [x] 5. Keeper: Cloudflare Worker, 1-minute cron, public `/status`. Pre-claim quote check, KV run log. See [KEEPER.md](KEEPER.md). Deploy pending task 8 (needs your Cloudflare login + keeper key)
 - [x] 6. Web app: three screens (Trade, Orders, Flywheel) with day/night market mood; wallet + wrong-network switch; exact approvals, place, cancel/refund with plain-English errors; armed / queued / executing / filled / expired / error states; live market clock; burn + keeper dashboard. Seeded demo mode. Verified with real transactions on a local chain (place → keeper fill → filled; error; cancel)
-- [ ] 7. Region notice (Pages Function)
+- [x] 7. Region notice: Pages Function middleware stamps `request.cf.country` on the HTML (`private, no-store`); blocked or unknown (Tor/XX/unstamped production page) → blocking notice + order creation off; cancel and refunds always stay available. Verified locally with `wrangler pages dev`
 - [ ] 8. Mainnet deploy, verify, real orders, docs/TRANSACTIONS.md
 - [ ] 9. Audit + SECURITY.md
 - [ ] 10. Submission pack: README, docs/DEMO-PATH.md
