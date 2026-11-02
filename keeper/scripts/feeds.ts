@@ -33,7 +33,7 @@ const now = Number(block.timestamp);
 const rows = await Promise.all(
   equities.map(async (f) => {
     const sym = f.docs?.baseAsset ?? f.name.replace(/^Robinhood /, "").split(/[ /-]/)[0]!;
-    const token = tokenOf.get(sym);
+    const token = tokenOf.get(sym) ?? tokenOf.get(sym.replace(/^RH/, "")); // DELL is listed as "RHDELL"
     const [round, decimals, oraclePaused, tokenPaused] = await Promise.all([
       client.readContract({ address: f.proxyAddress, abi: feedAbi, functionName: "latestRoundData" }),
       client.readContract({ address: f.proxyAddress, abi: feedAbi, functionName: "decimals" }),
