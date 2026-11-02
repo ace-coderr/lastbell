@@ -34,7 +34,7 @@ const from: Address = BROADCAST ? privateKeyToAccount(keyFromEnv("DEPLOYER_PRIVA
 const gas = await publicClient.estimateGas({ account: from, data });
 const gasPrice = await publicClient.getGasPrice();
 console.log(`Constructor OK against mainnet. Gas ${gas}, ≈ ${formatEther(gas * gasPrice)} ETH at current price.`);
-console.log(`Params: minFee 20 WIF · minBond 20,000 WIF · slash 2,000 WIF · claim window ${PARAMS.claimWindow}s · grace ${PARAMS.graceSeconds}s · max slippage ${PARAMS.maxSlippageBps / 100}%`);
+console.log(`Params: minFee 20 WIF · minBond 5,000 WIF · slash 500 WIF · claim window ${PARAMS.claimWindow}s · grace ${PARAMS.graceSeconds}s · max slippage ${PARAMS.maxSlippageBps / 100}%`);
 console.log(`Markets: SPY, NVDA, AAPL (band 1.5%)`);
 
 if (!BROADCAST) {
