@@ -8,8 +8,12 @@
     "crons": ["* * * * *"]
   },
   "vars": {
-    "RPC_URL": "https://rpc.mainnet.chain.robinhood.com"
+    "RPC_URL": "https://rpc.mainnet.chain.robinhood.com",
+    // Filled in after the mainnet deploy (task 8).
+    "LASTBELL_ADDRESS": ""
   },
+  // Run log for /status. Wrangler provisions the namespace on first deploy.
+  "kv_namespaces": [{ "binding": "STATE" }],
   "observability": { "enabled": true }
   // Secrets (set with `wrangler secret put`, never committed): KEEPER_PRIVATE_KEY
 }

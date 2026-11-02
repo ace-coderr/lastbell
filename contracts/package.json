@@ -7,7 +7,8 @@
     "build": "hardhat build",
     "typecheck": "hardhat build --quiet && tsc -p tsconfig.json",
     "test": "hardhat test",
-    "test:stress": "cross-env INVARIANT_SEEDS=25 INVARIANT_STEPS=400 hardhat test test/invariants.test.ts"
+    "test:stress": "cross-env INVARIANT_SEEDS=25 INVARIANT_STEPS=400 hardhat test test/invariants.test.ts",
+    "export-abi": "hardhat build --quiet && hardhat run scripts/export-abi.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "5.0.7",

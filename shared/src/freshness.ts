@@ -9,7 +9,24 @@ export type QueueReason =
   | "token-paused"
   | "bad-answer"
   | "not-updated-since-open"
-  | "older-than-heartbeat";
+  | "older-than-heartbeat"
+  | "pool-out-of-band";
+
+/** Index = Lastbell.Gate enum value on chain. */
+export const GATE_STATUS = [
+  "fresh",
+  "market-closed",
+  "oracle-paused",
+  "token-paused",
+  "bad-answer",
+  "not-updated-since-open",
+  "older-than-heartbeat",
+  "pool-out-of-band",
+] as const satisfies readonly ("fresh" | QueueReason)[];
+
+export type GateStatus = (typeof GATE_STATUS)[number];
+
+export const gateStatusOf = (value: number): GateStatus => GATE_STATUS[value] ?? "bad-answer";
 
 export interface FeedSnapshot {
   answer: bigint;
@@ -48,4 +65,5 @@ export const QUEUE_REASON_TEXT: Record<QueueReason, string> = {
   "bad-answer": "Price feed returned an invalid value. Queued.",
   "not-updated-since-open": "Waiting for the first price update of this session.",
   "older-than-heartbeat": "Price is older than its heartbeat. Queued until it refreshes.",
+  "pool-out-of-band": "Pool price disagrees with the oracle. Queued until they line up.",
 };

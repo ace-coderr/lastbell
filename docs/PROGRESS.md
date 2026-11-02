@@ -6,7 +6,7 @@ Submissions close 12 Nov 2026, 17:30 UTC. Target submit 10 Nov. Feature freeze 9
 - [x] 2. Scaffold: npm workspaces (shared, contracts, keeper, web), README skeleton, CI (typecheck, test, web build). Shared market-hours + freshness gate cross-checked against the tz database; NYSE holidays 2026-2027 built in
 - [x] 3. Contracts: escrow, keeper registry + $WIF bond, prepaid fees, 50/50 burn split, freshness checks, slashing. See [CONTRACTS.md](CONTRACTS.md). No owner; 18.5 KB runtime; smoke tests + on-chain market hours cross-check pass
 - [x] 4. Contract tests: 52 unit tests + seeded random sequences checked against an independent reference model (funds never lost, no execution on stale/paused feed, fees add up, no unbond with a live claim). Stress: 25 × 400 steps
-- [ ] 5. Keeper: Cloudflare Worker, 1-minute cron, public status endpoint
+- [x] 5. Keeper: Cloudflare Worker, 1-minute cron, public `/status`. Pre-claim quote check, KV run log. See [KEEPER.md](KEEPER.md). Deploy pending task 8 (needs your Cloudflare login + keeper key)
 - [ ] 6. Web app: wallet, network handling, orders, states, market clock, bond/burn dashboard
 - [ ] 7. Region notice (Pages Function)
 - [ ] 8. Mainnet deploy, verify, real orders, docs/TRANSACTIONS.md
