@@ -17,6 +17,8 @@ Share only the two **public** addresses.
 
 ## 2. Funding on Robinhood Chain (owner)
 
+Step-by-step routes and amounts: [FUNDING.md](FUNDING.md).
+
 Add the network (chain ID 4663, RPC `https://rpc.mainnet.chain.robinhood.com`, explorer `https://robinhoodchain.blockscout.com`). The site also offers to add it.
 
 | Wallet | ETH (gas) | $WIF | Stock / USDG |
