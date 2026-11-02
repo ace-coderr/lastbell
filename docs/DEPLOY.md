@@ -17,14 +17,7 @@ Share only the two **public** addresses.
 
 ## 2. Funding on Robinhood Chain (owner)
 
-Step-by-step routes and amounts: [FUNDING.md](FUNDING.md).
-
-Add the network (chain ID 4663, RPC `https://rpc.mainnet.chain.robinhood.com`, explorer `https://robinhoodchain.blockscout.com`). The site also offers to add it.
-
-| Wallet | ETH (gas) | $WIF | Stock / USDG |
-|---|---|---|---|
-| Deployer / test user | ~0.002 (deploy ≈ 0.0001) | ~200 (fees for several orders, 20 WIF minimum each) | a few dollars of NVDA, SPY or AAPL for stop-losses; ~10 USDG for a limit buy |
-| Keeper | ~0.003 | 20,000 + a little spare (minimum bond) | none |
+The smallest working amounts, in phases (deploy first, fund the rest after the contract is verified): [FUNDING.md](FUNDING.md). About 0.015 ETH (≈ $34) in total, of which only 0.0006 ETH is needed to deploy.
 
 ## 3. Preflight (assistant, read-only)
 
