@@ -51,6 +51,34 @@ npm test
 npm run dev -w web
 ```
 
+Without a contract address the web app runs on demo data. Add `?demo&at=2026-11-07T15:00:00Z` to the URL to see a chosen moment, for example the weekend "queued until open" state.
+
+Web build settings: `VITE_LASTBELL_ADDRESS` (contract), `VITE_KEEPER_URL` (keeper Worker, for `/status`) and `VITE_DEPLOY_BLOCK` (first block to search for fills).
+
+### Local test chain (real transactions, no real funds)
+
+Run each command in its own terminal from `contracts/`:
+
+```bash
+npx hardhat node
+```
+
+```bash
+npx hardhat run --network localhost scripts/local/deploy.ts
+```
+
+The deploy writes `web/.env.local` (gitignored). The app then runs against the local node and shows a "Connect wallet" button for Hardhat's test account. To move a price and run the real keeper engine once:
+
+```bash
+SYMBOL=SPY PRICE=735 npx hardhat run --network localhost scripts/local/price.ts
+```
+
+```bash
+npx hardhat run --network localhost scripts/local/keeper.ts
+```
+
+Delete `web/.env.local` afterwards to go back to demo mode.
+
 Read-only research scripts (they hit the public RPC):
 
 ```bash

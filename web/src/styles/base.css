@@ -548,3 +548,75 @@ a {
     overflow: hidden;
   }
 }
+
+/* ---------------------------------------------------------------- wallet */
+
+.wallet {
+  position: relative;
+  display: inline-flex;
+}
+
+.wallet-error {
+  position: absolute;
+  right: 0;
+  top: calc(100% + 8px);
+  width: max-content;
+  max-width: min(320px, 90vw);
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  border: 1px solid color-mix(in srgb, var(--error) 45%, transparent);
+  color: var(--error);
+  font-size: var(--fs-xs);
+  z-index: 30;
+}
+
+.wallet-pill {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: var(--fs-sm);
+}
+
+.wallet-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--filled);
+}
+
+.wallet-pill.is-wrong .wallet-dot {
+  background: var(--error);
+}
+
+.network-banner {
+  margin-top: var(--sp-4);
+}
+
+.action-stack {
+  display: grid;
+  gap: var(--sp-2);
+}
+
+.steps {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  color: var(--brass);
+}
+
+.empty {
+  display: grid;
+  justify-items: start;
+  gap: var(--sp-3);
+}
+
+.spin {
+  animation: spin 1.2s linear infinite;
+}
+
+.loading-note {
+  margin: var(--sp-7) 0;
+}

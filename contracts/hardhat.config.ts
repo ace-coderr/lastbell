@@ -12,6 +12,8 @@ export default defineConfig({
   },
   networks: {
     hardhatMainnet: { type: "edr-simulated", chainType: "l1" },
+    // `npx hardhat node`, for the local click-through test (scripts/local).
+    localhost: { type: "http", chainType: "l1", url: "http://127.0.0.1:8545" },
     robinhood: {
       type: "http",
       chainType: "generic",

@@ -47,6 +47,7 @@ export function TradeScreen(props: {
         </p>
       </section>
 
+      {markets.length === 0 && <p className="muted loading-note">Reading markets from chain…</p>}
       <div className="trade-grid">
         <div className="market-list" role="radiogroup" aria-label="Market">
           {markets.map((m, i) => (
