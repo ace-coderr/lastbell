@@ -1,0 +1,93 @@
+/*
+ * Lastbell design tokens: the single source for colour, type, space, radius and motion.
+ *
+ * The page has two moods, switched by data-session on <html> from the live market clock:
+ *   open   → "trading floor": deep slate with warm brass light.
+ *   closed → "after hours": the room dims to night blue and orders visibly go to sleep.
+ * Brass is the one accent (the bell). State colours are reserved for order states only.
+ */
+:root {
+  /* Surfaces: trading floor */
+  --bg: #12110f;
+  --bg-glow: rgba(232, 176, 74, 0.1);
+  --surface: #1b1916;
+  --surface-2: #24211d;
+  --surface-3: #2e2a25;
+  --line: #36312a;
+  --line-strong: #4d463c;
+
+  /* Text (AA on every surface above) */
+  --text: #f4eee4;
+  --text-2: #d2c8b9;
+  --muted: #a3988a;
+
+  /* Brass accent */
+  --brass: #e8b04a;
+  --brass-hover: #f2c46d;
+  --brass-soft: rgba(232, 176, 74, 0.13);
+  --brass-line: rgba(232, 176, 74, 0.45);
+  --on-brass: #1a1206;
+
+  /* Order states, one colour each */
+  --armed: #7fb2ff; /* watching the price */
+  --armed-soft: rgba(127, 178, 255, 0.13);
+  --queued: #b7a6ff; /* asleep until the market opens */
+  --queued-soft: rgba(183, 166, 255, 0.14);
+  --executing: #e8b04a; /* a keeper is on it */
+  --executing-soft: rgba(232, 176, 74, 0.15);
+  --filled: #6fdc9b;
+  --filled-soft: rgba(111, 220, 155, 0.13);
+  --expired: #8f877c;
+  --expired-soft: rgba(143, 135, 124, 0.14);
+  --error: #ff8a7a;
+  --error-soft: rgba(255, 138, 122, 0.13);
+  --burn: #ff7a3d; /* $WIF burned: flame orange, used for burn numbers only */
+
+  /* Type */
+  --font-display: "Bricolage Grotesque Variable", "Segoe UI", system-ui, sans-serif;
+  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
+  --fs-xs: 0.75rem;
+  --fs-sm: 0.86rem;
+  --fs-base: 0.98rem;
+  --fs-lg: 1.15rem;
+  --fs-xl: 1.55rem;
+  --fs-2xl: clamp(1.9rem, 1.3rem + 2.2vw, 2.8rem);
+  --fs-display: clamp(2.3rem, 1.3rem + 3.4vw, 3.9rem);
+
+  /* Space, shape, motion */
+  --sp-1: 4px;
+  --sp-2: 8px;
+  --sp-3: 12px;
+  --sp-4: 16px;
+  --sp-5: 24px;
+  --sp-6: 32px;
+  --sp-7: 48px;
+  --radius-sm: 10px;
+  --radius: 16px;
+  --radius-lg: 24px;
+  --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 40px -24px rgba(0, 0, 0, 0.7);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --mood-duration: 1.4s;
+  color-scheme: dark;
+}
+
+/* After hours: the same room at night. */
+:root[data-session="closed"] {
+  --bg: #0c0f17;
+  --bg-glow: rgba(183, 166, 255, 0.1);
+  --surface: #131826;
+  --surface-2: #1a2031;
+  --surface-3: #222a3e;
+  --line: #262e44;
+  --line-strong: #39435f;
+  --text: #ecebf5;
+  --text-2: #c6c5d8;
+  --muted: #9a99b3;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --mood-duration: 0s;
+  }
+}
