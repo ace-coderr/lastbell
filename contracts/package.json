@@ -8,7 +8,12 @@
     "typecheck": "hardhat build --quiet && tsc -p tsconfig.json",
     "test": "hardhat test",
     "test:stress": "cross-env INVARIANT_SEEDS=25 INVARIANT_STEPS=400 hardhat test test/invariants.test.ts",
-    "export-abi": "hardhat build --quiet && hardhat run scripts/export-abi.ts"
+    "export-abi": "hardhat build --quiet && hardhat run scripts/export-abi.ts",
+    "mainnet:preflight": "tsx scripts/mainnet/preflight.ts",
+    "mainnet:deploy": "hardhat build --quiet && tsx scripts/mainnet/deploy.ts",
+    "mainnet:deploy:broadcast": "hardhat build --quiet && cross-env BROADCAST=1 tsx scripts/mainnet/deploy.ts",
+    "mainnet:bond": "tsx scripts/mainnet/bond.ts",
+    "mainnet:bond:broadcast": "cross-env BROADCAST=1 tsx scripts/mainnet/bond.ts"
   },
   "devDependencies": {
     "@nomicfoundation/hardhat-toolbox-viem": "5.0.7",
@@ -17,6 +22,7 @@
     "cross-env": "^7.0.3",
     "hardhat": "3.21.2",
     "typescript": "~5.9.3",
-    "viem": "2.57.14"
+    "viem": "2.57.14",
+    "tsx": "4.23.15"
   }
 }
