@@ -1,0 +1,19 @@
+{
+  "name": "@lastbell/contracts",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "hardhat build",
+    "typecheck": "hardhat build --quiet && tsc -p tsconfig.json",
+    "test": "hardhat test"
+  },
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox-viem": "5.0.7",
+    "@openzeppelin/contracts": "5.6.1",
+    "@types/node": "^22.19.0",
+    "hardhat": "3.21.2",
+    "typescript": "~5.9.3",
+    "viem": "2.57.14"
+  }
+}

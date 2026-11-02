@@ -143,6 +143,22 @@ Implementation notes for task 3:
 - Two order types: **stop** (sell Stock → USDG when price ≤ trigger) and **limit** (buy Stock with USDG when price ≤ limit).
 - Gaps we accept and will document: no sequencer uptime feed exists for this chain; the 0.5% deviation threshold means a trigger can fire up to ~0.5% late; issuer powers listed in §4; thin $WIF liquidity.
 
-## 6. Reproducing
+## 6. Addendum: mid-week holidays
 
-The spike scripts (viem, read-only) will be ported to TypeScript under `keeper/scripts/` in task 2. They reuse the same reads the keeper needs: feeds, `oraclePaused`, pool quotes.
+The rule "feed updated since the session opened" catches holidays that start a week (Labor Day). It misses mid-week ones. Feeds get a forced round only at the Monday open; Tuesday to Friday opens show first updates hours later. So on Thanksgiving a Wednesday-evening price would still pass the heartbeat check. The gate therefore also uses an immutable NYSE full-day holiday table (2026 to 2027, from nyse.com/markets/hours-calendars). A holiday on day D closes the session from 20:00 ET on D-1 to 20:00 ET on D, which matches the observed feed gaps on 3 Jul and 7 Sep 2026. Unscheduled closures fall back to the pool-vs-feed band and the heartbeat.
+
+## 7. Reproducing
+
+The read-only scripts live in `keeper/scripts/`:
+
+```bash
+npm run spike:feeds -w keeper
+```
+
+```bash
+npm run spike:cadence -w keeper
+```
+
+```bash
+npm run spike:depth -w keeper
+```

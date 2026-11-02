@@ -1,0 +1,15 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lastbell-keeper",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-10-15",
+  "compatibility_flags": ["nodejs_compat"],
+  "triggers": {
+    "crons": ["* * * * *"]
+  },
+  "vars": {
+    "RPC_URL": "https://rpc.mainnet.chain.robinhood.com"
+  },
+  "observability": { "enabled": true }
+  // Secrets (set with `wrangler secret put`, never committed): KEEPER_PRIVATE_KEY
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "noUncheckedIndexedAccess": false,
+    "types": ["node"]
+  },
+  "include": ["hardhat.config.ts", "test", "scripts", "ignition", "artifacts/**/*.d.ts"]
+}
