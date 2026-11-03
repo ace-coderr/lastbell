@@ -47,7 +47,7 @@ The result is written to `contracts/deployments/robinhood-mainnet.json` (public 
 
 ## 6. Verify and wire up (assistant)
 
-- Verify the source on Blockscout.
+- Verify the source: Blockscout's API blocks scripts, so submit to Sourcify (`https://sourcify.dev/server/v2/verify/4663/<address>` with the build-info standard JSON input); Blockscout picks it up. Constructor arguments are in `contracts/deployments/constructor-args.cjs`.
 - Record the deployment transaction in [TRANSACTIONS.md](TRANSACTIONS.md).
 - Set `LASTBELL_ADDRESS` for the keeper, and `VITE_LASTBELL_ADDRESS` / `VITE_DEPLOY_BLOCK` / `VITE_KEEPER_URL` for the site.
 

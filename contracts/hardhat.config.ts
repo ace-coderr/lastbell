@@ -14,6 +14,8 @@ export default defineConfig({
     hardhatMainnet: { type: "edr-simulated", chainType: "l1" },
     // `npx hardhat node`, for the local click-through test (scripts/local).
     localhost: { type: "http", chainType: "l1", url: "http://127.0.0.1:8545" },
+    // Read-only (no account): used for `hardhat verify` so verification never needs a key.
+    robinhoodReadonly: { type: "http", chainType: "generic", chainId: 4663, url: "https://rpc.mainnet.chain.robinhood.com" },
     robinhood: {
       type: "http",
       chainType: "generic",
