@@ -250,6 +250,8 @@ contract Lastbell is KeeperRegistry {
         IERC20 tokenIn = kind == Kind.StopLoss ? IERC20(address(m.token)) : quote;
         uint256 received = _pull(tokenIn, amountIn);
         escrowed[address(tokenIn)] += received;
+        // An order that would round to a zero minimum output can never fill; refuse it up front.
+        if (_minOut(kind, received, triggerPrice, slippageBps, m, triggerPrice) == 0) revert BadOrder();
 
         uint256 available = feeBalance[msg.sender];
         if (available >= fee) {
@@ -355,6 +357,20 @@ contract Lastbell is KeeperRegistry {
         emit OrderFilled(id, msg.sender, g.price, o.amountIn, amountOut, burned, keeperFee);
     }
 
+    /// @notice The claimer drops its live claim without penalty, for an order it finds it cannot fill
+  /// (the pool moved past the slippage limit, the owner is blocked by the issuer, ...). Only while the
+  /// window is open: a keeper that goes dark and lets it lapse is still slashed.
+    function release(uint256 id) external nonReentrant {
+        Order storage o = _order(id);
+        if (o.status != Status.Open) revert NotOpen();
+        if (o.claimer != msg.sender) revert NotClaimer();
+        if (block.timestamp > o.claimDeadline) revert ClaimExpired();
+        keepers[msg.sender].activeClaims -= 1;
+        o.claimer = address(0);
+        o.claimDeadline = 0;
+        emit ClaimCleared(id, msg.sender, false);
+    }
+
     /// @notice Clears a claim whose window ran out. Slashes the keeper if the gate is fresh right now
     /// (the order was fillable); otherwise releases the claim without penalty.
     function clearExpiredClaim(uint256 id) external nonReentrant {
@@ -381,31 +397,62 @@ contract Lastbell is KeeperRegistry {
         if (answer > 0) r.price = uint256(answer);
 
         (bool open, uint256 start) = MarketHours.sessionStart(block.timestamp);
-        if (!open) r.status = Gate.MarketClosed;
-        else if (m.token.oraclePaused()) r.status = Gate.OraclePaused;
-        else if (m.token.paused()) r.status = Gate.TokenPaused;
-        else if (answer <= 0 || r.updatedAt == 0 || r.updatedAt > block.timestamp) r.status = Gate.BadAnswer;
-        else if (r.updatedAt < start) r.status = Gate.NotUpdatedSinceOpen;
-        else if (block.timestamp - r.updatedAt > uint256(m.heartbeat) + graceSeconds) r.status = Gate.OlderThanHeartbeat;
+        if (!open) {
+            r.status = Gate.MarketClosed;
+        } else {
+            // Issuer flags and pool reads must never make this view revert: cancel() and the UI depend on it.
+            (bool oracleOff, bool tokenOff, bool flagsOk) = _issuerFlags(m.token);
+            if (!flagsOk) r.status = Gate.BadAnswer;
+            else if (oracleOff) r.status = Gate.OraclePaused;
+            else if (tokenOff) r.status = Gate.TokenPaused;
+            else if (answer <= 0 || r.updatedAt == 0 || r.updatedAt > block.timestamp) r.status = Gate.BadAnswer;
+            else if (r.updatedAt < start) r.status = Gate.NotUpdatedSinceOpen;
+            else if (block.timestamp - r.updatedAt > uint256(m.heartbeat) + graceSeconds) r.status = Gate.OlderThanHeartbeat;
+        }
         if (r.price == 0) return r;
 
-        (uint160 sqrtPriceX96,,,,,,) = m.pool.slot0();
-        r.poolPrice = PriceMath.poolPrice(sqrtPriceX96, m.stockIsToken0, m.stockUnit, quoteUnit, m.feedUnit);
-        if (r.status == Gate.Fresh && PriceMath.deviationBps(r.poolPrice, r.price) > m.maxDeviationBps) {
-            r.status = Gate.PoolOutOfBand;
+        try m.pool.slot0() returns (uint160 sqrtPriceX96, int24, uint16, uint16, uint16, uint8, bool) {
+            r.poolPrice = PriceMath.poolPrice(sqrtPriceX96, m.stockIsToken0, m.stockUnit, quoteUnit, m.feedUnit);
+            if (r.status == Gate.Fresh && PriceMath.deviationBps(r.poolPrice, r.price) > m.maxDeviationBps) {
+                r.status = Gate.PoolOutOfBand;
+            }
+        } catch {
+            if (r.status == Gate.Fresh) r.status = Gate.PoolOutOfBand;
         }
+    }
+
+    function _issuerFlags(IStockToken t) internal view returns (bool oracleOff, bool tokenOff, bool ok) {
+        try t.oraclePaused() returns (bool a) {
+            oracleOff = a;
+        } catch {
+            return (false, false, false);
+        }
+        try t.paused() returns (bool b) {
+            tokenOff = b;
+        } catch {
+            return (false, false, false);
+        }
+        ok = true;
     }
 
     /// @notice Minimum output a fill must deliver at oracle price `price`.
     /// StopLoss: oracle value of the stock minus the user's slippage.
     /// LimitBuy: the larger of "amount at the limit price" and "oracle amount minus slippage".
     function minAmountOut(Order memory o, Market memory m, uint256 price) public view returns (uint256) {
-        uint256 keep = PriceMath.BPS - o.slippageBps;
-        if (o.kind == Kind.StopLoss) {
-            return PriceMath.quoteValue(o.amountIn, price, m.stockUnit, quoteUnit, m.feedUnit) * keep / PriceMath.BPS;
+        return _minOut(o.kind, o.amountIn, o.triggerPrice, o.slippageBps, m, price);
+    }
+
+    function _minOut(Kind kind, uint256 amountIn, uint256 triggerPrice, uint256 slippageBps, Market memory m, uint256 price)
+        internal
+        view
+        returns (uint256)
+    {
+        uint256 keep = PriceMath.BPS - slippageBps;
+        if (kind == Kind.StopLoss) {
+            return PriceMath.quoteValue(amountIn, price, m.stockUnit, quoteUnit, m.feedUnit) * keep / PriceMath.BPS;
         }
-        uint256 atLimit = PriceMath.stockValue(o.amountIn, o.triggerPrice, m.stockUnit, quoteUnit, m.feedUnit);
-        uint256 atOracle = PriceMath.stockValue(o.amountIn, price, m.stockUnit, quoteUnit, m.feedUnit) * keep / PriceMath.BPS;
+        uint256 atLimit = PriceMath.stockValue(amountIn, triggerPrice, m.stockUnit, quoteUnit, m.feedUnit);
+        uint256 atOracle = PriceMath.stockValue(amountIn, price, m.stockUnit, quoteUnit, m.feedUnit) * keep / PriceMath.BPS;
         return atLimit > atOracle ? atLimit : atOracle;
     }
 

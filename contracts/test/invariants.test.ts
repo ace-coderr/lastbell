@@ -86,7 +86,7 @@ function mulberry32(seed: number) {
   };
 }
 
-const totals = { steps: 0, placed: 0, claims: 0, fills: 0, cancels: 0, slashes: 0, closedClaimAttempts: 0, rejectedUnbondsWithClaims: 0 };
+const totals = { releases: 0, steps: 0, placed: 0, claims: 0, fills: 0, cancels: 0, slashes: 0, closedClaimAttempts: 0, rejectedUnbondsWithClaims: 0 };
 
 async function run(seed: number) {
   const f: Fixture = await networkHelpers.loadFixture(deployFixture);
@@ -170,6 +170,19 @@ async function run(seed: number) {
       assert.ok(BigInt(activeClaims) <= bond / PARAMS.slashAmount, ctx(step, "claims beyond capacity"));
     }
     assert.equal(bonds, totalBonded, ctx(step, "bond ledger"));
+  }
+
+  const ZERO = "0x0000000000000000000000000000000000000000";
+  /** A keeper that cannot fill drops its live claim: allowed only inside the window, never slashed. */
+  async function tryRelease(o: OrderModel, k: (typeof keepers)[number], step: number) {
+    const slashesBefore = (await lb.read.keepers([k.account.address]))[3];
+    const deadline = Number((await lb.read.getOrder([o.id])).claimDeadline);
+    const hash = await attempt(lb.write.release([o.id], { account: k.account }));
+    if (!hash) return;
+    assert.ok((await txTime(hash)) <= deadline, ctx(step, "released after the window"));
+    assert.equal((await lb.read.keepers([k.account.address]))[3], slashesBefore, ctx(step, "release slashed the keeper"));
+    assert.equal((await lb.read.getOrder([o.id])).claimer, ZERO, ctx(step, "claim not cleared"));
+    totals.releases++;
   }
 
   async function tryFill(o: OrderModel, k: (typeof keepers)[number], step: number) {
@@ -278,7 +291,9 @@ async function run(seed: number) {
         assert.ok(mm.price <= o.trigger, ctx(step, "claim succeeded untriggered"));
         assert.ok(ts + PARAMS.claimWindow <= o.expiry, ctx(step, "claim too close to expiry"));
         totals.claims++;
-        if (rnd() < 0.7) await tryFill(o, k, step);
+        const choice = rnd();
+        if (choice < 0.55) await tryFill(o, k, step);
+        else if (choice < 0.8) await tryRelease(o, k, step); // it found the fill would not work
       }
     } else if (r < 0.8 && openOrders.length) {
       // fill: usually a claimed order by its claimer, sometimes anything by anyone
@@ -306,8 +321,21 @@ async function run(seed: number) {
       } else if (caller.account.address === o.owner) {
         assert.ok(o.kind === Kind.StopLoss && markets[o.market]!.tokenPaused, ctx(step, "owner could not cancel"));
       }
-    } else if (r < 0.91 && openOrders.length) {
-      await attempt(lb.write.clearExpiredClaim([pick(openOrders).id]));
+    } else if (r < 0.935 && openOrders.length) {
+      if (rnd() < 0.5) {
+        const claimed = [];
+        for (const o of openOrders) {
+          const c = (await lb.read.getOrder([o.id])).claimer.toLowerCase();
+          const k = keepers.find((x) => x.account.address.toLowerCase() === c);
+          if (k) claimed.push({ o, k });
+        }
+        if (claimed.length) {
+          const { o, k } = pick(claimed);
+          await tryRelease(o, k, step);
+        }
+      } else {
+        await attempt(lb.write.clearExpiredClaim([pick(openOrders).id]));
+      }
     } else if (r < 0.97) {
       // keeper bond changes; unbonding must fail while any claim is live (so try that often)
       const withClaims = [];
@@ -353,6 +381,7 @@ describe("randomized invariants", () => {
     console.log("    coverage:", JSON.stringify(totals));
     assert.ok(totals.fills >= 4 * SEEDS, "too few fills");
     assert.ok(totals.slashes > 0, "never slashed");
+    assert.ok(totals.releases > 0, "never released a claim");
     assert.ok(totals.rejectedUnbondsWithClaims > 0, "never tried to unbond with a live claim");
     assert.ok(totals.cancels > 0 && totals.claims > totals.fills / 2, "too few cancels/claims");
     assert.ok(totals.closedClaimAttempts > 0, "never tried to claim while closed");

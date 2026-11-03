@@ -36,15 +36,18 @@ Checked at claim and again at fill. Order of checks:
 - **Keeper bond.** `bond()` locks $WIF and needs at least `minBond` to claim. Each live claim is backed by `slashAmount`, so a keeper can hold `bond / slashAmount` claims at once. `unbond()` reverts while any claim is live.
 - **Prepaid fees.** `depositFees()` / `withdrawFees()`. `placeOrder` reserves the fee, taking it from the prepaid balance first and pulling any shortfall from the wallet.
 - **Fill.** `fee / 2` is burned with `WIF.burn` and the rest goes to the keeper, so the parts always add up.
+- **Release.** A keeper that finds it cannot fill (the pool moved past the user's slippage, the owner is blocked by the issuer, ...) calls `release(id)` while its window is open and drops the claim without penalty. After the window only a slash or clear frees it, so a keeper that goes dark is still punished.
 - **Slash.** If a claim's window ends while the gate is fresh (meaning the order could have been filled), the next `claim`, a `cancel` or `clearExpiredClaim` burns `slashAmount` of the keeper's bond. If the gate isn't fresh, the claim is released with no penalty.
+
+Audit hardening ([AUDIT.md](AUDIT.md)): `placeOrder` rejects orders whose minimum output at their own trigger price is zero, and `gate()` never reverts (a failing issuer flag or pool read reads as a closed gate), so owners can always cancel.
 
 ## Parameters (fixed at deploy)
 
 | | Test value | Planned mainnet value |
 |---|---|---|
-| `minFee` | 50 WIF | decided at deploy (task 8) |
-| `minBond` | 100,000 WIF | decided at deploy |
-| `slashAmount` | 10,000 WIF | decided at deploy |
+| `minFee` | 50 WIF | 20 WIF |
+| `minBond` | 100,000 WIF | 1,000 WIF |
+| `slashAmount` | 10,000 WIF | 100 WIF |
 | `claimWindow` | 120 s | 120 s |
 | `graceSeconds` | 900 s | 900 s |
 | `maxSlippageBps` | 300 | 300 |
@@ -52,7 +55,7 @@ Checked at claim and again at fill. Order of checks:
 
 ## Tests
 
-`npm test -w contracts` runs 52 unit tests and 6 seeded random sequences (200 steps each). `npm run test:stress -w contracts` runs 25 × 400.
+`npm test -w contracts` runs 87 tests (unit, audit, keeper end-to-end) and 7 seeded random sequences (200 steps each). `npm run test:stress -w contracts` runs 25 × 400.
 
 | File | Covers |
 |---|---|

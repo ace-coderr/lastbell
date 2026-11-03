@@ -17,7 +17,7 @@ Share only the two **public** addresses.
 
 ## 2. Funding on Robinhood Chain (owner)
 
-The smallest working amounts, in phases (deploy first, fund the rest after the contract is verified): [FUNDING.md](FUNDING.md). About 0.0053 ETH (≈ $12) in total, of which only 0.0006 ETH is needed to deploy.
+The smallest working amounts, in phases (deploy first, fund the rest after the contract is verified): [FUNDING.md](FUNDING.md). Contract v2 (audit fixes, 1,000 WIF minimum bond) is redeployed once with the ETH the deployer already holds, then about 0.0007 ETH more is bridged for the keeper's WIF and gas.
 
 ## 3. Preflight (assistant, read-only)
 
@@ -61,7 +61,7 @@ npm run mainnet:bond -w contracts
 npm run mainnet:bond:broadcast -w contracts
 ```
 
-This makes an exact approval and bonds 5,000 WIF, the minimum. That backs up to 10 claims at once.
+This makes an exact approval and bonds 1,000 WIF, the minimum. That backs up to 10 claims at once.
 
 ## 8. Cloudflare (owner logs in; assistant deploys; owner sets the secret)
 

@@ -208,7 +208,7 @@ async function send(
   publicClient: PublicClient,
   wallet: Wallet,
   cfg: EngineConfig,
-  functionName: "claim" | "fill" | "cancel",
+  functionName: "claim" | "fill" | "cancel" | "release",
   id: bigint,
 ): Promise<Hash> {
   const { request } = await publicClient.simulateContract({
@@ -224,7 +224,10 @@ async function send(
   return hash;
 }
 
-/** True when the pool would currently deliver at least the contract's min-out for this order. */
+/**
+ * True when the pool would currently deliver at least the contract's min-out for this order.
+ * A min-out of zero can never be filled (the contract rejects it), so it is never worth a claim.
+ */
 async function poolCanFill(publicClient: PublicClient, cfg: EngineConfig, s: Snapshot, o: OrderSnap): Promise<boolean> {
   if (!cfg.quoter) return true;
   const m = s.markets[o.market]!;
@@ -235,22 +238,27 @@ async function poolCanFill(publicClient: PublicClient, cfg: EngineConfig, s: Sna
     functionName: "minAmountOut",
     args: [order, m.market, m.gate.price],
   });
+  if (minOut === 0n) return false;
   const stockIn = o.kind === 0;
-  const { result } = await publicClient.simulateContract({
-    address: cfg.quoter,
-    abi: quoterV2Abi,
-    functionName: "quoteExactInputSingle",
-    args: [
-      {
-        tokenIn: stockIn ? m.market.token : s.quote,
-        tokenOut: stockIn ? s.quote : m.market.token,
-        amountIn: o.amountIn,
-        fee: m.market.poolFee,
-        sqrtPriceLimitX96: 0n,
-      },
-    ],
-  });
-  return result[0] >= minOut;
+  try {
+    const { result } = await publicClient.simulateContract({
+      address: cfg.quoter,
+      abi: quoterV2Abi,
+      functionName: "quoteExactInputSingle",
+      args: [
+        {
+          tokenIn: stockIn ? m.market.token : s.quote,
+          tokenOut: stockIn ? s.quote : m.market.token,
+          amountIn: o.amountIn,
+          fee: m.market.poolFee,
+          sqrtPriceLimitX96: 0n,
+        },
+      ],
+    });
+    return result[0] >= minOut;
+  } catch {
+    return false; // the quoter reverts when the pool cannot swap this amount at all
+  }
 }
 
 export async function runOnce(publicClient: PublicClient, wallet: Wallet, cfg: EngineConfig): Promise<RunReport> {
@@ -261,6 +269,7 @@ export async function runOnce(publicClient: PublicClient, wallet: Wallet, cfg: E
 
   for (const a of p.actions) {
     const r: ActionResult = { kind: a.kind, orderId: a.order.id.toString(), ok: false, txs: [] };
+    let holdsClaim = a.kind === "fill";
     try {
       if (a.kind === "refund-expired") {
         r.txs.push(await send(publicClient, wallet, cfg, "cancel", a.order.id));
@@ -272,12 +281,23 @@ export async function runOnce(publicClient: PublicClient, wallet: Wallet, cfg: E
             continue;
           }
           r.txs.push(await send(publicClient, wallet, cfg, "claim", a.order.id));
+          holdsClaim = true;
         }
         r.txs.push(await send(publicClient, wallet, cfg, "fill", a.order.id));
+        holdsClaim = false;
       }
       r.ok = true;
     } catch (err) {
       r.note = errorText(err);
+      // A claim we cannot fill is released for free while its window is open, never left to lapse into a slash.
+      if (holdsClaim) {
+        try {
+          r.txs.push(await send(publicClient, wallet, cfg, "release", a.order.id));
+          r.note += " (claim released, no slash)";
+        } catch (releaseErr) {
+          r.note += ` (release failed: ${errorText(releaseErr)})`;
+        }
+      }
     }
     results.push(r);
   }

@@ -16,8 +16,8 @@ export const PARAMS = {
   quote: USDG.address,
   router: UNISWAP_V3.swapRouter02,
   minFee: parseUnits("20", 18), // ≈ $0.03 at $0.00135/WIF
-  minBond: parseUnits("5000", 18), // ≈ $7
-  slashAmount: parseUnits("500", 18), // 10 concurrent claims per minimum bond
+  minBond: parseUnits("1000", 18), // ≈ $1.4
+  slashAmount: parseUnits("100", 18), // 10 concurrent claims per minimum bond
   claimWindow: 120,
   graceSeconds: 900,
   maxSlippageBps: 300,

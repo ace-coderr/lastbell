@@ -2,7 +2,8 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 const root = (dataset: Record<string, string>) => ({ dataset }) as unknown as HTMLElement;
 
-describe("readRegion", () => {
+// The first dynamic import loads viem and the shared package cold, which takes about 5 s on a slow machine.
+describe("readRegion", { timeout: 30_000 }, () => {
   afterEach(() => {
     vi.unstubAllEnvs();
     vi.resetModules();

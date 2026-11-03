@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { beforeEach, describe, it } from "node:test";
 import { runOnce } from "../../keeper/src/engine.js";
 import {
-  PARAMS, SATURDAY, STOCK, Status, USDG, WIF, bondKeeper, deployFixture, networkHelpers, now, place, setPrice, usd,
+  Kind, PARAMS, SATURDAY, STOCK, Status, USDG, WIF, bondKeeper, deployFixture, networkHelpers, now, place, setPrice, usd,
   type Fixture,
 } from "./fixture.js";
 
@@ -86,5 +86,40 @@ describe("keeper engine end to end", () => {
     assert.equal(report.results[0]!.ok, true, report.results[0]!.note);
     assert.equal((await f.lastbell.read.keepers([f.keeper2.account.address]))[3], 1);
     assert.equal((await f.lastbell.read.getOrder([id])).status, Status.Filled);
+  });
+});
+
+describe("keeper engine: unfillable claims are released, never slashed", () => {
+  it("claims a limit buy whose owner the issuer blocks, sees the fill cannot work, and releases for free", async () => {
+    const f = await networkHelpers.loadFixture(deployFixture);
+    await bondKeeper(f);
+    const cfg = { lastbell: f.lastbell.address, quoter: f.router.address };
+    const id = await place(f, { market: 1, kind: Kind.LimitBuy, amountIn: USDG("500"), trigger: usd("230") });
+    await f.nvda.write.setBlocked([f.alice.account.address, true]); // the quote cannot see this
+    await setPrice(f, 1, usd("205"));
+
+    const report = await runOnce(f.publicClient as never, f.keeper as never, cfg);
+    const r = report.results[0]!;
+    assert.equal(r.ok, false);
+    assert.match(r.note ?? "", /claim released, no slash/);
+    assert.equal(r.txs.length, 2); // claim, then release
+    const k = await f.lastbell.read.keepers([f.keeper.account.address]);
+    assert.equal(k[1], 0); // no live claim left behind
+    assert.equal(k[3], 0); // never slashed
+    assert.equal((await f.lastbell.read.getOrder([id])).claimer, "0x0000000000000000000000000000000000000000");
+  });
+
+  it("never claims a triggered order whose minimum output is zero", async () => {
+    const f = await networkHelpers.loadFixture(deployFixture);
+    await bondKeeper(f);
+    // A zero-min-out order can no longer be placed, so check the engine's own guard through a market-price drop:
+    // a stop-loss sized so that its min-out is positive at the trigger but zero at a crashed price.
+    const id = await place(f, { amountIn: 1_400_000_000n, trigger: usd("760"), slippageBps: 0 });
+    await setPrice(f, 0, usd("1")); // oracle collapses to $1: min-out at that price rounds to zero (pool follows)
+    const report = await runOnce(f.publicClient as never, f.keeper as never, { lastbell: f.lastbell.address, quoter: f.router.address });
+    assert.equal(report.results[0]?.ok ?? false, false);
+    assert.match(report.results[0]?.note ?? "", /not claiming/);
+    assert.equal((await f.lastbell.read.keepers([f.keeper.account.address]))[3], 0);
+    void id;
   });
 });

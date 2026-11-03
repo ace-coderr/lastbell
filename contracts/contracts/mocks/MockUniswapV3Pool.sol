@@ -7,6 +7,7 @@ contract MockUniswapV3Pool {
     address public immutable token1;
     uint24 public immutable fee;
     uint160 public sqrtPriceX96;
+    bool public broken;
 
     constructor(address tokenA, address tokenB, uint24 fee_, uint160 sqrtPriceX96_) {
         (token0, token1) = tokenA < tokenB ? (tokenA, tokenB) : (tokenB, tokenA);
@@ -18,7 +19,12 @@ contract MockUniswapV3Pool {
         sqrtPriceX96 = value;
     }
 
+    function setBroken(bool value) external {
+        broken = value;
+    }
+
     function slot0() external view returns (uint160, int24, uint16, uint16, uint16, uint8, bool) {
+        require(!broken, "pool down");
         return (sqrtPriceX96, 0, 0, 1, 1, 0, true);
     }
 }

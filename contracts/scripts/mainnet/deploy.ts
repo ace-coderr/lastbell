@@ -1,7 +1,7 @@
 // Deploys Lastbell to Robinhood Chain mainnet.
 //   Dry run (default, no key needed): npx tsx scripts/mainnet/deploy.ts
 //   Broadcast (uses DEPLOYER_PRIVATE_KEY from contracts/.env): BROADCAST=1 npx tsx scripts/mainnet/deploy.ts
-import { mkdirSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, writeFileSync } from "node:fs";
 import { createWalletClient, encodeDeployData, formatEther, http, type Address } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { robinhoodChain } from "@lastbell/shared";
@@ -9,6 +9,9 @@ import { BROADCAST, DEPLOYMENT_FILE, MARKET_CONFIGS, PARAMS, RPC_URL, artifact, 
 
 const chainId = await publicClient.getChainId();
 if (chainId !== 4663) throw new Error(`Connected to chain ${chainId}, expected 4663`);
+if (BROADCAST && existsSync(DEPLOYMENT_FILE)) {
+  throw new Error("A mainnet deployment is already recorded (contracts/deployments/robinhood-mainnet.json). Refusing to deploy again; move or rename that file first if you really mean to.");
+}
 
 // Every address must be a contract before anything is sent.
 const addrs: [string, Address][] = [
@@ -34,7 +37,7 @@ const from: Address = BROADCAST ? privateKeyToAccount(keyFromEnv("DEPLOYER_PRIVA
 const gas = await publicClient.estimateGas({ account: from, data });
 const gasPrice = await publicClient.getGasPrice();
 console.log(`Constructor OK against mainnet. Gas ${gas}, ≈ ${formatEther(gas * gasPrice)} ETH at current price.`);
-console.log(`Params: minFee 20 WIF · minBond 5,000 WIF · slash 500 WIF · claim window ${PARAMS.claimWindow}s · grace ${PARAMS.graceSeconds}s · max slippage ${PARAMS.maxSlippageBps / 100}%`);
+console.log(`Params: minFee 20 WIF · minBond 1,000 WIF · slash 100 WIF · claim window ${PARAMS.claimWindow}s · grace ${PARAMS.graceSeconds}s · max slippage ${PARAMS.maxSlippageBps / 100}%`);
 console.log(`Markets: SPY, NVDA, AAPL (band 1.5%)`);
 
 if (!BROADCAST) {

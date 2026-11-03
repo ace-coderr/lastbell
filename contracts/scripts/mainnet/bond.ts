@@ -1,6 +1,6 @@
 // Bonds $WIF for the keeper wallet: an exact approval, then bond().
 //   Dry run (default): npx tsx scripts/mainnet/bond.ts
-//   Broadcast (uses KEEPER_PRIVATE_KEY from contracts/.env): BROADCAST=1 BOND_WIF=5000 npx tsx scripts/mainnet/bond.ts
+//   Broadcast (uses KEEPER_PRIVATE_KEY from contracts/.env): BROADCAST=1 BOND_WIF=1000 npx tsx scripts/mainnet/bond.ts
 import { lastbellAbi, robinhoodChain } from "@lastbell/shared";
 import { createWalletClient, erc20Abi, formatUnits, http, parseUnits } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
