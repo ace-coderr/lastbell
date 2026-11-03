@@ -1,40 +1,43 @@
-# Funding: the smallest working version
+# Funding: phase 2 (keeper) and phase 3
 
-Priced on chain on 2 Nov 2026 (ETH $2,254.69 and NVDA $202.39 from the Chainlink feeds; gas 0.02 gwei; WIF from the deep Uniswap v4 ETH/WIF pool, about 1,550 WIF per 0.001 ETH). Recheck on the swap screen before confirming.
+Phase 1 is done: Lastbell is deployed ([TRANSACTIONS.md](TRANSACTIONS.md)). The bond size (minimum 5,000 WIF, slash 500 WIF) is `immutable` in the deployed contract and there is no owner, so it cannot be changed; see "Option B" below for what a smaller bond would take.
+
+Priced on chain on 3 Nov 2026: ETH $2,242.71 (Chainlink), gas 0.0201 gwei, WIF from the deep Uniswap v4 ETH/WIF pool (5,100 WIF costs 0.00328 ETH). Recheck the quote on the swap screen before confirming.
 
 You only ever need **ETH on Robinhood Chain**. Everything else is bought from that ETH on Uniswap.
 
-## The total
+## Phase 2: bond the keeper (keep the 5,000 WIF bond)
 
-| Need | Amount | ETH | USD |
-|---|---|---|---|
-| Deployer gas (deploy ≈ 0.0001 ETH, then ~20 transactions) | | 0.0006 | $1.35 |
-| Keeper gas (bond, claims, fills) | | 0.0003 | $0.68 |
-| **$WIF**: 5,000 for the one keeper bond + 100 for five test fees | 5,100 WIF | 0.0033 | $7.44 |
-| **One tiny NVDA order**: 0.01 NVDA (≈ $2.02) plus swap fee and slippage | 0.01 NVDA | 0.0011 | $2.48 |
-| **Total** | | **0.0053 ETH** | **≈ $12** |
+The deployer wallet (`0xF282…93FA`) already holds **0.000517 ETH**; the keeper (`0x2C94…feE5`) holds nothing.
 
-Bond: minimum 5,000 WIF, slash 500 WIF (fixed at deploy; still 10 claims per bond). Bridging fees on the source chain are extra and depend on the route: bridge about 0.006 ETH so the swaps have a little slack.
+| Step | What | Amount |
+|---|---|---|
+| 1 | **Bridge** to the deployer | **0.0032 ETH** (≈ $7.18) |
+| 2 | **Swap** ETH → WIF on Uniswap with the deployer wallet | **0.0033 ETH** → about 5,130 WIF |
+| 3 | **Send the keeper** | **5,000 WIF** (exactly the bond) and **0.0002 ETH** (gas; ≈ $0.45) |
+| 4 | Deployer keeps | about 130 WIF (fees for up to 6 test orders at 20 WIF) and about 0.0002 ETH of gas |
 
-## What can wait
+Check: 0.000517 + 0.0032 − 0.0033 − 0.0002 ≈ 0.0002 ETH left on the deployer, enough for dozens of its own transactions (one costs about $0.002).
 
-Send only the first row to start. The deploy costs about $0.20 in gas, and nothing else is needed to deploy and verify the contract.
+Test order fees are paid by the wallet that places the order (the deployer), not by the keeper. The keeper earns half of each fee back.
 
-| Phase | Send / buy | ETH | Do it |
-|---|---|---|---|
-| **1. Deploy** | deployer gas | 0.0006 ($1.35) | now |
-| **2. Keeper** | 5,100 WIF to the keeper, plus keeper gas | 0.0036 ($8.12) | **after** the contract is deployed, verified on Blockscout, and reads correctly |
-| **3. One NVDA order** | 0.01 NVDA to the deployer | 0.0011 ($2.48) | after the keeper is bonded and the Worker is running |
-| 4. Extras (optional) | second 0.01 NVDA for the cancel and weekend tests (0.0011 ETH); the limit buy's ~$2 USDG comes from the first order's proceeds; a cancelled order's fee returns to your prepaid balance, so no extra WIF | 0.0011 ($2.48) | only if you want those on-chain demos |
+Paste `0x5173b8ea6923c2d40267890d45c46a3480954773` into the token search and check it reads **WIF / World is Flat**. If the quote is far below about 1,550 WIF per 0.001 ETH, stop: most other WIF pools are near-empty with 50 to 90% fees.
 
-So the order is: deploy, verify, **then** spend the other $11.
+Bridge routes: [Relay](https://relay.link/bridge/robinhood) or [Across](https://across.to/?to=robinhood) (seconds), or the [Arbitrum canonical bridge](https://portal.arbitrum.io/bridge?destinationChain=robinhood-chain&sourceChain=ethereum) (about 10 min). Source-chain bridge fees are extra and depend on the route.
 
-## Steps
+## Phase 3: one tiny NVDA order (later)
 
-1. **Bridge** about 0.006 ETH to the deployer (`0xF282…93FA`): [Relay](https://relay.link/bridge/robinhood) or [Across](https://across.to/?to=robinhood) (seconds), or the [Arbitrum canonical bridge](https://portal.arbitrum.io/bridge?destinationChain=robinhood-chain&sourceChain=ethereum) (about 10 min).
-2. Phase 1 needs no swaps, so deploy now ([DEPLOY.md](DEPLOY.md) step 5).
-3. After the contract is verified, on [Uniswap](https://app.uniswap.org/swap?chain=robinhood) with the deployer wallet, swap **0.0033 ETH → WIF**. Paste `0x5173b8ea6923c2d40267890d45c46a3480954773` into the token search and check it reads **WIF / World is Flat**. If the quote is far below about 1,550 WIF per 0.001 ETH, stop: most other WIF pools are near-empty with 50 to 90% fees.
-4. Send the keeper (`0x2C94…feE5`) **5,100 WIF** and **0.0003 ETH**.
-5. Swap **0.0011 ETH → NVDA** (about 0.01 NVDA). Only do this if Stock Tokens may be offered to you.
+After the keeper is bonded and the Worker is running: swap **0.0011 ETH → NVDA** (about 0.01 NVDA, ≈ $2.02) with the deployer. Bridge 0.0011 ETH more, or use what is left. Only if Stock Tokens may be offered to you.
 
-When you're done, tell the assistant. It re-runs the read-only preflight before each phase.
+## Option B: a 1,000 WIF bond (needs a second deployment)
+
+Deploy a second Lastbell with minimum bond **1,000 WIF** and slash **100 WIF** (same 10 claims per bond). Nothing is bonded or ordered yet, so this is the only clean moment to do it.
+
+| Step | What | Amount |
+|---|---|---|
+| 1 | Bridge to the deployer | **0.0007 ETH** (≈ $1.57) |
+| 2 | Redeploy (gas) | ≈ 0.00009 ETH from the deployer |
+| 3 | Swap ETH → WIF | **0.00072 ETH** → about 1,120 WIF |
+| 4 | Send the keeper | **1,000 WIF** and **0.0002 ETH** |
+
+It saves about **$5.4** (0.0025 ETH less to bring over, minus the $0.21 redeploy). The costs: a second contract address on the explorer (the first would be recorded as superseded), re-verification, and an update of every address in the docs, the Worker and the site.

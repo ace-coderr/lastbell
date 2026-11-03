@@ -14,7 +14,7 @@ Robinhood Chain (4663). Explorer: [robinhoodchain.blockscout.com](https://robinh
 | What | Transaction | Notes |
 |---|---|---|
 | Approve WIF | _pending_ | |
-| Bond 5,000 WIF | _pending_ | |
+| Bond 5,000 WIF (keeper holds exactly 5,000) | _pending_ | |
 
 ## Orders
 
