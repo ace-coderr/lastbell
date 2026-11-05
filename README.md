@@ -33,7 +33,13 @@ _To be written._ Keepers lock a $WIF bond. Users prepay fees in $WIF. Each fee i
 
 ## Live links
 
-_After deployment (task 8)._
+| What | Link |
+|---|---|
+| App | https://lastbell-cyk.pages.dev |
+| Keeper status (public JSON) | https://lastbell-keeper.plumbline-app.workers.dev/status |
+| Contract (Robinhood Chain, verified) | [`0x03f4…890e`](https://robinhoodchain.blockscout.com/address/0x03f4Bf9214474f38D6DD6d60591419a923B4890e?tab=contract) |
+| Every transaction | [docs/TRANSACTIONS.md](docs/TRANSACTIONS.md) |
+| Contract audit | [docs/AUDIT.md](docs/AUDIT.md) |
 
 ## Develop
 

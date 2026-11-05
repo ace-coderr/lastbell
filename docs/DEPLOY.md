@@ -86,3 +86,9 @@ With the deployer wallet on the live site:
 4. **Weekend:** a stop-loss placed after Friday 20:00 ET shows *Queued until open* and fills after Monday's first price update if its trigger is crossed.
 
 The assistant records every transaction hash in [TRANSACTIONS.md](TRANSACTIONS.md) with explorer links.
+
+## Live deployment (5 Nov 2026)
+
+- **Keeper Worker** `lastbell-keeper`: cron every minute, KV namespace `lastbell-keeper-state`; secrets `KEEPER_PRIVATE_KEY` and `RPC_URL_PRIVATE` (never in git).
+- **Site** Cloudflare Pages project `lastbell`, deployed from `web/` with the Pages Function (region notice). Build settings: `VITE_LASTBELL_ADDRESS=0x03f4Bf9214474f38D6DD6d60591419a923B4890e`, `VITE_KEEPER_URL=https://lastbell-keeper.plumbline-app.workers.dev`, `VITE_DEPLOY_BLOCK=106594457`.
+- Redeploy the site: build with those variables set, then `npx wrangler pages deploy dist --project-name lastbell --branch main` from `web/`.
