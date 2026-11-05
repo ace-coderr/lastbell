@@ -30,12 +30,22 @@ Before deployment it reports `configured: false` and falls back to reading the C
 
 KV holds the run log. Runs that did nothing are written once every 10 minutes, so even every-minute cron stays within the free tier's 1,000 writes per day.
 
+## RPC and rate limits (found in production)
+
+Robinhood's public RPC (`rpc.mainnet.chain.robinhood.com`) is rate-limited per IP and "not recommended for production" (docs.robinhood.com/chain/connecting). Cloudflare Workers share egress addresses, so from a Worker even a 4-request status read returned `Rate Limit Hit` / `Too Many Requests`. What the keeper does about it:
+
+- **Private RPC.** The Worker prefers the secret `RPC_URL_PRIVATE` (for example an Alchemy URL with an API key) over the public `RPC_URL`. This is what makes it reliable; it is required for production.
+- **Multicall3 batching.** All reads are batched: a status read is 4 requests instead of 21, and a cron snapshot 3 instead of 14.
+- **Snapshot.** The cron saves a status snapshot to KV every 3 minutes. `/status` serves it with no RPC call, and if the RPC is failing it serves the last snapshot marked `stale`.
+- **KV budget.** Runs are recorded only when something happened or the outcome changed, plus a 10-minute heartbeat (the free tier allows 1,000 writes a day; this uses about 650 at most).
+
 ## Configuration
 
 | Name | Kind | Value |
 |---|---|---|
-| `RPC_URL` | var | `https://rpc.mainnet.chain.robinhood.com` |
-| `LASTBELL_ADDRESS` | var | set after the mainnet deploy (task 8) |
+| `RPC_URL` | var | `https://rpc.mainnet.chain.robinhood.com` (public fallback only) |
+| `RPC_URL_PRIVATE` | **secret** | a private provider URL; set with `wrangler secret put RPC_URL_PRIVATE` |
+| `LASTBELL_ADDRESS` | var | `0x03f4Bf9214474f38D6DD6d60591419a923B4890e` (v2) |
 | `QUOTER_ADDRESS` | var (optional) | defaults to Uniswap QuoterV2 `0x33e8…A9E7` |
 | `KEEPER_PRIVATE_KEY` | **secret** | set by the owner with `wrangler secret put KEEPER_PRIVATE_KEY`; never in git |
 | `STATE` | KV binding | provisioned by wrangler on first deploy |

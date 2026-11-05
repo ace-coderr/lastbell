@@ -9,8 +9,8 @@
   },
   "vars": {
     "RPC_URL": "https://rpc.mainnet.chain.robinhood.com",
-    // Filled in after the mainnet deploy (task 8).
-    "LASTBELL_ADDRESS": ""
+    // Lastbell v2 on Robinhood Chain mainnet (docs/TRANSACTIONS.md).
+    "LASTBELL_ADDRESS": "0x03f4Bf9214474f38D6DD6d60591419a923B4890e"
   },
   // Run log for /status. Wrangler provisions the namespace on first deploy.
   "kv_namespaces": [{ "binding": "STATE" }],
