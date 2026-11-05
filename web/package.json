@@ -9,10 +9,12 @@
     "preview": "vite preview",
     "typecheck": "tsc -p tsconfig.json && tsc -p functions/tsconfig.json",
     "test": "vitest run",
-    "pages:dev": "wrangler pages dev dist"
+    "pages:dev": "wrangler pages dev dist",
+    "brand": "node scripts/brand.mjs"
   },
   "dependencies": {
     "@fontsource-variable/bricolage-grotesque": "5.3.0",
+    "@fontsource/hanken-grotesk": "5.3.0",
     "@fontsource/ibm-plex-mono": "5.3.0",
     "@fontsource/ibm-plex-sans": "5.3.0",
     "@lastbell/shared": "0.1.0",
@@ -24,13 +26,15 @@
     "wagmi": "3.7.9"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "5.20261101.1",
+    "@resvg/resvg-js": "2.6.2",
     "@types/react": "19.3.0",
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "6.1.2",
+    "satori": "0.63.2",
     "typescript": "~5.9.3",
     "vite": "8.3.5",
     "vitest": "4.1.12",
-    "@cloudflare/workers-types": "5.20261101.1",
     "wrangler": "4.156.1"
   }
 }
