@@ -1,7 +1,7 @@
 /* ---------------------------------------------------------------- shared bits */
 
 .ticker {
-  font-family: var(--font-display);
+  font-family: var(--font-text);
   font-weight: 700;
   font-size: 1.4rem;
   letter-spacing: -0.03em;
@@ -12,26 +12,13 @@
 }
 
 .screen-head {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: var(--sp-4);
-  margin: var(--sp-7) 0 var(--sp-5);
+  margin: 0 0 var(--sp-5);
 }
 
 .screen-title {
-  font-size: var(--fs-2xl);
-  margin: 6px 0 0;
-  max-width: 18ch;
-}
-
-.section-head {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--sp-3);
-  margin-bottom: var(--sp-3);
+  font-size: var(--fs-display);
+  margin: 0;
+  max-width: 20ch;
 }
 
 .fine {
@@ -47,13 +34,13 @@
   font-size: var(--fs-sm);
 }
 .warn-text {
-  color: var(--brass);
+  color: var(--coral);
 }
 .night-text {
   color: var(--queued);
 }
 .brass-text {
-  color: var(--brass);
+  color: var(--coral);
 }
 .filled-text {
   color: var(--filled);
@@ -84,11 +71,11 @@
 }
 
 :root[data-session="open"] .hero-title em {
-  color: var(--brass);
+  color: var(--coral);
 }
 
 .hero-sub {
-  color: var(--text-2);
+  color: var(--muted);
   font-size: var(--fs-base);
   max-width: 60ch;
   margin: 0;
@@ -133,14 +120,14 @@
 }
 
 .market-card.is-active {
-  border-color: var(--brass-line);
+  border-color: var(--coral-line);
 }
 
 .market-glow {
   position: absolute;
   inset: 0;
   pointer-events: none;
-  background: radial-gradient(420px 120px at 0% 0%, var(--brass-soft), transparent 70%);
+  background: radial-gradient(420px 120px at 0% 0%, var(--coral-soft), transparent 70%);
 }
 
 .market-head {
@@ -219,11 +206,11 @@
   height: 8px;
   border-radius: 999px;
   overflow: hidden;
-  background: var(--surface-3);
+  background: var(--ink-800);
 }
 
 .fee-burn {
-  background: linear-gradient(90deg, #ff9a52, var(--burn));
+  background: linear-gradient(90deg, var(--coral), var(--burn));
 }
 
 .fee-keeper {
@@ -238,7 +225,7 @@
   gap: 8px;
   font-size: var(--fs-xs);
   font-family: var(--font-mono);
-  color: var(--text-2);
+  color: var(--muted);
 }
 
 .fee-legend svg {
@@ -250,7 +237,7 @@
   padding: var(--sp-4);
   border-radius: var(--radius);
   background: var(--surface-2);
-  border-left: 3px solid var(--brass);
+  border-left: 3px solid var(--coral);
   font-size: var(--fs-lg);
   line-height: 1.45;
 }
@@ -343,7 +330,7 @@
 }
 
 .order[data-state="executing"] {
-  border-color: var(--brass-line);
+  border-color: var(--coral-line);
 }
 
 .order.is-asleep {
@@ -369,7 +356,7 @@
 
 .order-title {
   margin: 0;
-  font-family: var(--font-display);
+  font-family: var(--font-text);
   font-size: 1.3rem;
   letter-spacing: -0.02em;
   font-weight: 600;
@@ -398,7 +385,7 @@
   top: 10px;
   height: 2px;
   max-width: calc(75% - 6px);
-  background: var(--brass);
+  background: var(--coral);
 }
 
 .rail.asleep .rail-fill {
@@ -422,8 +409,8 @@
 }
 
 .rail-step.done .rail-dot {
-  background: var(--brass);
-  border-color: var(--brass);
+  background: var(--coral);
+  border-color: var(--coral);
 }
 
 .rail.asleep .rail-step.done .rail-dot {
@@ -444,7 +431,7 @@
   position: absolute;
   inset: -2px;
   border-radius: 50%;
-  background: var(--brass);
+  background: var(--coral);
 }
 
 .rail-label {
@@ -456,7 +443,7 @@
 }
 
 .rail-step.current .rail-label {
-  color: var(--text);
+  color: var(--fg);
 }
 
 .order-detail {
@@ -479,166 +466,6 @@
 }
 
 /* ---------------------------------------------------------------- flywheel */
-
-.fw-grid {
-  display: grid;
-  grid-template-columns: 1.15fr 1fr;
-  gap: var(--sp-5);
-  margin-bottom: var(--sp-5);
-}
-
-.fw-grid.two {
-  grid-template-columns: 1.2fr 1fr;
-}
-
-@media (max-width: 860px) {
-  .fw-grid,
-  .fw-grid.two {
-    grid-template-columns: 1fr;
-  }
-}
-
-.burn-card {
-  display: grid;
-  gap: var(--sp-3);
-  align-content: start;
-  background:
-    radial-gradient(520px 220px at 0% 0%, rgba(255, 122, 61, 0.12), transparent 70%),
-    var(--surface);
-}
-
-.burn-number {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  color: var(--burn);
-  font-size: clamp(2.8rem, 2rem + 4vw, 4.6rem);
-}
-
-.burn-value {
-  font-family: var(--font-display);
-  letter-spacing: -0.04em;
-}
-
-.burn-parts {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--sp-4);
-  font-size: var(--fs-sm);
-  color: var(--text-2);
-}
-
-.tiles {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: var(--sp-3);
-  margin-top: var(--sp-3);
-}
-
-.tile {
-  display: grid;
-  gap: 4px;
-  padding: var(--sp-3) var(--sp-4);
-  border-radius: var(--radius);
-  background: var(--surface-2);
-  border: 1px solid var(--line);
-}
-
-.tile-value {
-  font-size: 1.25rem;
-}
-
-.wheel {
-  position: relative;
-  max-width: 360px;
-  margin: 64px auto 40px;
-  aspect-ratio: 1;
-}
-
-.wheel svg {
-  width: 100%;
-  height: 100%;
-  overflow: visible;
-}
-
-.wheel-track {
-  fill: none;
-  stroke: var(--line);
-  stroke-width: 14;
-}
-
-.wheel-flow {
-  fill: none;
-  stroke: var(--brass);
-  stroke-width: 2;
-  opacity: 0.7;
-}
-
-.wheel-token {
-  fill: var(--brass);
-  filter: drop-shadow(0 0 6px rgba(232, 176, 74, 0.7));
-}
-
-.wheel-node {
-  fill: var(--surface);
-  stroke: var(--brass);
-  stroke-width: 2;
-}
-
-.wheel-center {
-  color: var(--burn);
-}
-
-.wheel-center text {
-  fill: var(--burn);
-  font-family: var(--font-mono);
-  font-size: 11px;
-  letter-spacing: 0.14em;
-  text-transform: uppercase;
-}
-
-.wheel-label {
-  position: absolute;
-  display: grid;
-  gap: 2px;
-  width: 132px;
-  font-size: var(--fs-xs);
-  line-height: 1.3;
-  text-align: center;
-  transform: translate(-50%, -50%);
-  background: color-mix(in srgb, var(--surface) 92%, transparent);
-  padding: 6px 8px;
-  border-radius: 10px;
-  border: 1px solid var(--line);
-}
-
-.wheel-label strong {
-  font-family: var(--font-display);
-  font-size: 0.95rem;
-}
-
-.wheel-label span {
-  color: var(--muted);
-}
-
-.wheel-label.a-90 {
-  transform: translate(-50%, -110%);
-}
-.wheel-label.a90 {
-  transform: translate(-50%, 10%);
-}
-.wheel-label.a0 {
-  transform: translate(-30%, -50%);
-}
-.wheel-label.a180 {
-  transform: translate(-70%, -50%);
-}
-
-@media (max-width: 520px) {
-  .wheel-label {
-    width: 104px;
-  }
-}
 
 .table {
   width: 100%;
@@ -664,7 +491,7 @@
 }
 
 .table td svg {
-  color: var(--brass);
+  color: var(--coral);
   vertical-align: -2px;
 }
 

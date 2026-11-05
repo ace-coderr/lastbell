@@ -43,7 +43,7 @@ export function OrdersScreen(props: {
 
   return (
     <div className="orders">
-      <header className="screen-head">
+      <header className="screen-head fw-head">
         <div>
           <p className="label">Your orders</p>
           <h1 className="display screen-title">What each order is doing, right now.</h1>
@@ -91,7 +91,7 @@ function OrderCard({ o, m, state, clock, now, pending, onCancel }: { o: UiOrder;
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.97 }}
       transition={{ type: "spring", stiffness: 380, damping: 34 }}
-      className={`order card card-pad ${asleep ? "is-asleep" : ""} ${ended ? "is-ended" : ""}`}
+      className={`order cell cell-pad ${asleep ? "is-asleep" : ""} ${ended ? "is-ended" : ""}`}
       data-state={state.kind}
     >
       <div className="order-top">

@@ -187,10 +187,9 @@ export function App() {
                   badge={DEMO ? <span className="demo-badge">demo data</span> : LOCAL ? <span className="demo-badge">local test chain</span> : null}
                 />
               )}
-              {screen !== "trade" && (
+              {screen === "orders" && (
                 <section className="section section-dark" data-band="none">
                   <div className="wrap">
-              {screen === "orders" && (
                 <OrdersScreen
                   orders={orders}
                   markets={markets}
@@ -201,16 +200,23 @@ export function App() {
                   onCancel={cancel}
                   empty={ordersEmpty}
                 />
+                  </div>
+                </section>
               )}
               {screen === "flywheel" &&
                 (stats ? (
                   <FlywheelScreen stats={stats} markets={markets} now={now} />
                 ) : (
-                  <p className="muted loading-note">Reading the flywheel from chain…</p>
+                  <section className="section section-dark" data-band="none">
+                    <div className="wrap fw-loading" aria-busy="true">
+                      <span className="skeleton" />
+                      <span className="skeleton" />
+                      <span className="skeleton" />
+                      <p className="muted loading-note">Reading the flywheel from chain…</p>
+                    </div>
+                  </section>
                 ))}
-                  </div>
-                </section>
-              )}
+
             </motion.div>
           </AnimatePresence>
       </main>
