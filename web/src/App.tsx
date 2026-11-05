@@ -2,7 +2,7 @@ import { marketClock } from "@lastbell/shared";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLastbellActions } from "./chain/actions.js";
-import { useLiveFlywheel, useLiveMarkets, useLiveOrders } from "./chain/live.js";
+import { useLiveFlywheel, useLiveMarkets, useLiveOrders, useMinFee } from "./chain/live.js";
 import { BellMark } from "./components/Bell.js";
 import { MarketClock } from "./components/MarketClock.js";
 import { RegionGate } from "./components/RegionGate.js";
@@ -56,6 +56,7 @@ export function App() {
   const live = useLiveMarkets();
   const liveOrders = useLiveOrders(wallet.address, live.markets, live.chain);
   const liveStats = useLiveFlywheel();
+  const contractMinFee = useMinFee();
   const actions = useLastbellActions(live.chain);
   const { connect, connecting, error: connectError } = useConnectWallet();
 
@@ -202,6 +203,7 @@ export function App() {
                   clock={clock}
                   now={now}
                   action={ticketAction}
+                  minFeeWif={DEMO ? undefined : (contractMinFee ?? 50)}
                   badge={DEMO ? <span className="demo-badge">demo data</span> : LOCAL ? <span className="demo-badge">local test chain</span> : null}
                 />
               )}

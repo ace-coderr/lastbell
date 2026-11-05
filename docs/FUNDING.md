@@ -33,6 +33,17 @@ Paste `0x5173b8ea6923c2d40267890d45c46a3480954773` into the token search and che
 
 Bridge routes: [Relay](https://relay.link/bridge/robinhood) or [Across](https://across.to/?to=robinhood) (seconds), or the [Arbitrum canonical bridge](https://portal.arbitrum.io/bridge?destinationChain=robinhood-chain&sourceChain=ethereum) (about 10 min). Source-chain fees are extra and, on an amount this small, can exceed the amount itself: pick the cheapest route.
 
-## Phase 3: one tiny NVDA order (later)
+## Phase 3: the smallest demo order
 
-After the keeper is bonded and the Worker is running: swap **0.0011 ETH → NVDA** (about 0.01 NVDA, ≈ $2.02) with the deployer. Only if Stock Tokens may be offered to you.
+Measured on chain on 5 Nov 2026 (NVDA oracle $198.29, pool $199.02, ETH $2,418.84). The contract rejects an order only if its minimum output at its own trigger price rounds to zero, and the real pool fills far below a cent, so the floor is not what limits you; readable numbers and gas are.
+
+| NVDA | Value | Contract min-out at 1% slippage | Real pool pays | Fills? |
+|---|---|---|---|---|
+| 0.000001 | $0.0002 | 0.000196 USDG | 0.000198 | yes, but the site shows "$0.00" |
+| 0.0001 | $0.02 | 0.019629 | 0.019891 | yes |
+| **0.001** | **$0.20** | **0.196303** | **0.198916** | **yes (recommended)** |
+| 0.002 | $0.40 | 0.392606 | 0.397833 | yes |
+| 0.01 | $1.98 | 1.963033 | 1.989168 | yes |
+| 0.00000001 | $0.000002 | 0 | 0.000001 | no: min-out rounds to 0 at the oracle price, so the keeper never claims it |
+
+**Smallest working demo: 0.001 NVDA (about $0.20).** Buy about **0.0012 NVDA with 0.0001 ETH** on Uniswap (the 0.0002 NVDA spare covers swap fees), place a stop-loss for 0.001 NVDA with a trigger a little above the live price and the default 20 WIF fee. The site reads the 20 WIF minimum fee from the contract. About 0.0003 ETH is left for gas, which covers the swap, the approvals, the order and a cancel several times over.

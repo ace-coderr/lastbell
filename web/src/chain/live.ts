@@ -19,6 +19,12 @@ function symbolFor(token: Address, index: number): MarketSymbol {
   return MARKET_LIST.find((m) => m.token.toLowerCase() === token.toLowerCase())?.symbol ?? FALLBACK_ORDER[index] ?? "SPY";
 }
 
+/** The deployed contract's minimum keeper fee, in WIF (undefined until it loads). */
+export function useMinFee(): number | undefined {
+  const { data } = useReadContract({ ...lb, functionName: "minFee", query: { enabled: !!LASTBELL } });
+  return data === undefined ? undefined : Number(formatUnits(data, 18));
+}
+
 export function useLiveMarkets() {
   const { data: count } = useReadContract({ ...lb, functionName: "marketCount", query: { enabled: !!LASTBELL } });
   const ids = Array.from({ length: Number(count ?? 0) }, (_, i) => i);

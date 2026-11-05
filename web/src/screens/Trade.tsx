@@ -19,7 +19,8 @@ export interface OrderDraft {
 const SLIPPAGE = [50, 100, 200];
 const EXPIRY = [1, 7, 30];
 const BAND_BPS = 150;
-export const MIN_FEE_WIF = 50;
+/** Demo default; live mode passes the deployed contract's own minimum fee. */
+export const DEFAULT_MIN_FEE_WIF = 50;
 
 export function TradeScreen(props: {
   markets: UiMarket[];
@@ -27,6 +28,8 @@ export function TradeScreen(props: {
   now: number;
   action: (draft: OrderDraft | null) => ReactNode;
   badge?: ReactNode;
+  /** Minimum keeper fee in WIF. Live mode reads it from the contract. */
+  minFeeWif?: number;
 }) {
   const { markets, clock, now } = props;
   const [selected, setSelected] = useState(0);
@@ -54,7 +57,7 @@ export function TradeScreen(props: {
             <MarketCard key={m.symbol} m={m} active={i === selected} onSelect={() => setSelected(i)} now={now} />
           ))}
         </div>
-        {market && <Ticket market={market} clock={clock} now={now} action={props.action} />}
+        {market && <Ticket market={market} clock={clock} now={now} action={props.action} minFeeWif={props.minFeeWif ?? DEFAULT_MIN_FEE_WIF} />}
       </div>
     </div>
   );
@@ -94,13 +97,14 @@ function MarketCard({ m, active, onSelect, now }: { m: UiMarket; active: boolean
   );
 }
 
-function Ticket({ market, clock, now, action }: { market: UiMarket; clock: MarketClock; now: number; action: (d: OrderDraft | null) => ReactNode }) {
+function Ticket({ market, clock, now, action, minFeeWif }: { market: UiMarket; clock: MarketClock; now: number; action: (d: OrderDraft | null) => ReactNode; minFeeWif: number }) {
   const [kind, setKind] = useState<OrderKind>("stop");
   const [amount, setAmount] = useState("2");
   const [trigger, setTrigger] = useState("");
   const [slippageBps, setSlippage] = useState(100);
   const [expiryDays, setExpiry] = useState(7);
-  const [fee, setFee] = useState(String(MIN_FEE_WIF));
+  const [fee, setFee] = useState(String(minFeeWif));
+  useEffect(() => setFee(String(minFeeWif)), [minFeeWif]);
 
   // Sensible defaults whenever the market or side changes: 3% below the live price.
   useEffect(() => {
@@ -111,7 +115,7 @@ function Ticket({ market, clock, now, action }: { market: UiMarket; clock: Marke
   const t = Number(trigger);
   const a = Number(amount);
   const f = Number(fee);
-  const valid = a > 0 && t > 0 && f >= MIN_FEE_WIF;
+  const valid = a > 0 && t > 0 && f >= minFeeWif;
   const draft: OrderDraft | null = valid ? { market, kind, amountIn: a, trigger: t, slippageBps, expiryDays, feeWif: f } : null;
   const distance = ((t - market.price) / market.price) * 100;
   const keep = 1 - slippageBps / 10_000;
@@ -196,7 +200,7 @@ function Ticket({ market, clock, now, action }: { market: UiMarket; clock: Marke
             <input inputMode="decimal" value={fee} onChange={(e) => setFee(e.target.value)} aria-label="Fee in WIF" />
             <span className="unit">WIF</span>
           </span>
-          <FeeSplit fee={f} />
+          <FeeSplit fee={f} min={minFeeWif} />
         </label>
       </div>
 
@@ -232,8 +236,8 @@ function Ticket({ market, clock, now, action }: { market: UiMarket; clock: Marke
   );
 }
 
-function FeeSplit({ fee }: { fee: number }) {
-  const ok = fee >= MIN_FEE_WIF;
+function FeeSplit({ fee, min }: { fee: number; min: number }) {
+  const ok = fee >= min;
   const half = ok ? fee / 2 : 0;
   return (
     <div className="fee-split" aria-label="Fee split">
@@ -249,7 +253,7 @@ function FeeSplit({ fee }: { fee: number }) {
           <Shield size={13} /> {wif(half)} to the keeper
         </span>
       </div>
-      {!ok && <span className="error-text">Minimum fee is {MIN_FEE_WIF} WIF.</span>}
+      {!ok && <span className="error-text">Minimum fee is {min} WIF.</span>}
     </div>
   );
 }
