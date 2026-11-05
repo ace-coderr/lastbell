@@ -58,18 +58,11 @@ export function FlywheelScreen({ stats, markets, now }: { stats: FlywheelStats; 
           </div>
           <ol className="fw-flow">
             {FLOW.map(([n, title, body], i) => (
-              <motion.li
-                key={n}
-                className="cell cell-pad"
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-40px" }}
-                transition={{ delay: i * 0.08, duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-              >
+              <li key={n} className="cell cell-pad reveal">
                 <span className="label">{n}</span>
                 <h3>{title}</h3>
                 <p>{body}</p>
-              </motion.li>
+              </li>
             ))}
           </ol>
 

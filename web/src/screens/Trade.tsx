@@ -152,11 +152,8 @@ function SectionHead({ n, title, sub }: { n: string; title: string; sub: string 
 
 /** Fades and lifts into place when scrolled into view. */
 function Reveal({ className, children }: { className?: string; children: ReactNode }) {
-  return (
-    <motion.div className={className} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
-      {children}
-    </motion.div>
-  );
+  // Content is in the page and fully drawn from the first frame. The fade is CSS only (see .reveal), so nothing can stay hidden.
+  return <div className={`${className ?? ""} reveal`}>{children}</div>;
 }
 
 function StatTiles({ stats, markets }: { stats?: FlywheelStats; markets: UiMarket[] }) {
