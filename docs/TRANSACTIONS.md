@@ -24,8 +24,8 @@ Robinhood Chain (4663). Explorer: [robinhoodchain.blockscout.com](https://robinh
 
 | What | Transaction | Notes |
 |---|---|---|
-| Approve WIF | _pending_ | |
-| Bond 1,000 WIF (keeper holds exactly 1,000) | _pending_ | |
+| Approve WIF | [`0x6d71358a…f7a5b7`](https://robinhoodchain.blockscout.com/tx/0x6d71358a5e68d0874e8f72f9a522c1df90f1b49e6c0fa7846b53068596f7a5b7) | Block 106603096. Keeper `0x2C94…feE5` approved Lastbell v2 for exactly 1,000 WIF (not unlimited) |
+| Bond 1,000 WIF | [`0x9679c589…e0b6ab`](https://robinhoodchain.blockscout.com/tx/0x9679c589396d80931c8333df5aef64c75424068d5d006bda1c4fdf2a31e0b6ab) | Block 106603126, 2026-11-05 08:37 UTC. Gas used 100,825. Checked on chain: bond 1,000 WIF, active keeper, claim capacity 10, no fills or slashes yet |
 
 ## Orders
 
