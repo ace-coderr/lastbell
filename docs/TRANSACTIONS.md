@@ -17,8 +17,8 @@ Robinhood Chain (4663). Explorer: [robinhoodchain.blockscout.com](https://robinh
 
 | What | Transaction | Notes |
 |---|---|---|
-| Deploy Lastbell v2 | _pending_ | |
-| Source verified | _pending_ | |
+| Deploy Lastbell v2 | [`0xbe79d958…9dd958`](https://robinhoodchain.blockscout.com/tx/0xbe79d9580ba05c6a94d2af5d5646f4d09044048e87d7cfd0650d73746a9dd958) | Block 106594457, 2026-11-05 08:22 UTC. Contract [`0x03f4Bf9214474f38D6DD6d60591419a923B4890e`](https://robinhoodchain.blockscout.com/address/0x03f4Bf9214474f38D6DD6d60591419a923B4890e). Deployer `0xF282…93FA`. Gas used 4,691,976 (about 0.000094 ETH). Minimum fee 20 WIF, minimum bond 1,000 WIF, slash 100 WIF, claim window 120 s, grace 900 s, max slippage 3%. Checked on chain: parameters, all three feeds and pools, `release(uint256)` present, no owner or admin functions; runtime code equals the audited build (41 immutable slots masked) |
+| Source verified | [Blockscout: verified, full match, 42 functions](https://robinhoodchain.blockscout.com/address/0x03f4Bf9214474f38D6DD6d60591419a923B4890e?tab=contract) | solc 0.8.30, optimizer 500 runs, cancun. Sourcify: exact match for creation and runtime code (2026-11-05 08:24 UTC) |
 
 ## Keeper
 
