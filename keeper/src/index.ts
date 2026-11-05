@@ -145,6 +145,7 @@ export default {
       if (wantSnapshot) await refreshSnapshot(env);
       return;
     }
+    let acted = false;
     try {
       const wallet = createWalletClient({ account, chain: robinhoodChain, transport: http(rpcUrl(env)) });
       const report = await runOnce(publicClient(env), wallet, {
@@ -154,6 +155,7 @@ export default {
       const done = report.results.map((r) => `${r.kind}#${r.orderId}:${r.ok ? "ok" : r.note}`).join(" ");
       console.log(`block ${report.block} open=${report.open} ${done || "no actions"} skipped=${JSON.stringify(report.skipped)}`);
       await record(env, { ok: true, ...report }, minute);
+      acted = report.results.length > 0;
     } catch (err) {
       const e = err as { details?: string };
       const error = `${errorText(err)}${e.details ? `: ${e.details}` : ""}`;
@@ -161,6 +163,7 @@ export default {
       await record(env, { ok: false, at, error }, minute);
     }
     // The snapshot is refreshed after trading, so a slow or rate-limited status read never delays an execution.
-    if (wantSnapshot) await refreshSnapshot(env);
+    // After a run that claimed, filled or refunded something, refresh at once so /status shows the new totals.
+    if (wantSnapshot || acted) await refreshSnapshot(env);
   },
 } satisfies ExportedHandler<Env>;
