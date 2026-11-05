@@ -21,7 +21,7 @@ Submissions close 12 Nov 2026, 17:30 UTC. Target submit 10 Nov. Feature freeze 9
 - [x] U3. Navbar and design tokens: dusk/cream/coral/lilac/mint palette in one tokens file, Hanken Grotesk + IBM Plex Mono, sticky blurred navbar (logo, 4 links, one status chip, one wallet button, mobile menu sheet; 65px tall on a phone, was 163px)
 - [x] U4. Trade page: landing, bento, stats, footer
 - [x] U5. Orders and Flywheel re-skin
-- [ ] U6. Motion layer
+- [x] U6. Motion layer
 - [ ] U7. States
 - [ ] U8. Mobile (390 and 768) and accessibility
 - [ ] U9. Tests, build scan, screenshots (then stop and ask before redeploying)

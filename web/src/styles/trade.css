@@ -417,3 +417,74 @@
   height: 110px;
   border-radius: var(--radius-cell);
 }
+
+/* ---- motion feedback */
+
+.btn {
+  transition: transform 0.12s var(--ease), background-color 0.15s, border-color 0.15s, color 0.15s;
+}
+.btn:not(:disabled):hover {
+  transform: translateY(-1px);
+}
+.btn:not(:disabled):active {
+  transform: translateY(0) scale(0.97);
+}
+.cell {
+  transition: border-color 0.2s;
+}
+.bento-cell:hover,
+.how-cell:hover {
+  border-color: var(--line-strong);
+}
+.choice:active,
+.market-card:active {
+  transform: scale(0.98);
+}
+
+.firecheck-verdict.pending {
+  color: var(--muted);
+}
+.firecheck li[data-ok="pending"] {
+  opacity: 0.6;
+}
+.spin {
+  animation: spin 0.9s linear infinite;
+}
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.order {
+  position: relative;
+}
+.burn-burst {
+  position: absolute;
+  right: 16px;
+  top: 52px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--coral);
+  color: var(--ink-950);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spin,
+  .btn,
+  .cell {
+    animation: none;
+    transition: none;
+  }
+  .btn:not(:disabled):hover,
+  .btn:not(:disabled):active {
+    transform: none;
+  }
+}

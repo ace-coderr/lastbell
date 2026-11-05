@@ -39,6 +39,10 @@ export function App() {
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
+  useEffect(() => {
+    window.scrollTo({ top: 0 });
+  }, [screen]);
+
   // The room dims after hours.
   useEffect(() => {
     document.documentElement.dataset.session = clock.open ? "open" : "closed";

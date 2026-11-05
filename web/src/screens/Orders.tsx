@@ -1,5 +1,6 @@
 import { EXPLORER_URL, QUEUE_REASON_TEXT, type MarketClock } from "@lastbell/shared";
 import { AnimatePresence, motion } from "motion/react";
+import { useEffect, useRef, useState } from "react";
 import { StateChip, type ChipState } from "../components/StateChip.js";
 import { External, Flame, Moon } from "../components/icons.js";
 import { localWhen, num, usd, wif } from "../lib/format.js";
@@ -76,6 +77,18 @@ export function OrdersScreen(props: {
 
 function OrderCard({ o, m, state, clock, now, pending, onCancel }: { o: UiOrder; m?: UiMarket; state: ChipState; clock: MarketClock; now: number; pending: boolean; onCancel: () => void }) {
   const step = stepOf(state);
+  // When an order flips to filled while you are looking at it, show the half of its fee that burns.
+  const prevKind = useRef(state.kind);
+  const [burst, setBurst] = useState(false);
+  useEffect(() => {
+    if (prevKind.current !== "filled" && state.kind === "filled") {
+      setBurst(true);
+      const id = setTimeout(() => setBurst(false), 3200);
+      prevKind.current = state.kind;
+      return () => clearTimeout(id);
+    }
+    prevKind.current = state.kind;
+  }, [state.kind]);
   const asleep = state.kind === "queued";
   const ended = state.kind === "expired" || state.kind === "cancelled";
   const canCancel = o.status === "open";
@@ -101,6 +114,14 @@ function OrderCard({ o, m, state, clock, now, pending, onCancel }: { o: UiOrder;
         </div>
         <StateChip state={state} />
       </div>
+
+      <AnimatePresence>
+        {burst && (
+          <motion.div className="burn-burst" initial={{ opacity: 0, y: 10, scale: 0.9 }} animate={{ opacity: 1, y: -6, scale: 1 }} exit={{ opacity: 0, y: -28 }} transition={{ duration: 0.5, ease: [0.22, 1, 0.36, 1] }} role="status">
+            <Flame size={16} /> {wif(o.feeWif / 2)} burned forever
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       <h3 className="order-title">{title}</h3>
 

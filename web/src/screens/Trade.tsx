@@ -1,8 +1,8 @@
 import { QUEUE_REASON_TEXT, type MarketClock } from "@lastbell/shared";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { BondSlashArt, BurnFlywheelArt, CustodyArt, FreshGuardArt } from "../components/dots.js";
-import { Check, Flame, Moon, Shield, ArrowDown } from "../components/icons.js";
+import { Check, Flame, Moon, Shield, ArrowDown, Spinner } from "../components/icons.js";
 import { TickingNumber } from "../components/Ticking.js";
 import { localWhen, num, pct, usd, wif } from "../lib/format.js";
 import { formatCountdown } from "../lib/time.js";
@@ -373,16 +373,27 @@ function FireCheck({ market, clock, now, trigger }: { market: UiMarket; clock: M
     [reached, "Trigger reached", trigger ? `${usd(market.price)} vs ${usd(trigger)}` : "-"],
   ];
   const fires = rows.every((r) => r[0]);
+  // The checks resolve one by one, so the gate reads as something being evaluated.
+  const reduce = useReducedMotion();
+  const sig = `${market.symbol}|${trigger}|${clock.open}|${fresh}`;
+  const [done, setDone] = useState(rows.length);
+  useEffect(() => {
+    if (reduce) return setDone(rows.length);
+    setDone(0);
+    const id = setInterval(() => setDone((d) => (d >= rows.length ? d : d + 1)), 260);
+    return () => clearInterval(id);
+  }, [sig, reduce, rows.length]);
+  const complete = done >= rows.length;
   return (
     <div className="firecheck">
       <div className="firecheck-head">
         <span className="label">Would it fire right now?</span>
-        <span className={`firecheck-verdict ${fires ? "yes" : "no"}`}>{fires ? "Yes" : "Not yet, it waits"}</span>
+        <span className={`firecheck-verdict ${complete ? (fires ? "yes" : "no") : "pending"}`}>{complete ? (fires ? "Yes" : "Not yet, it waits") : "Checking…"}</span>
       </div>
       <ul>
         {rows.map(([ok, title, detail], i) => (
-          <motion.li key={title} initial={{ opacity: 0, x: -6 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: i * 0.05 }} data-ok={ok}>
-            <span className="tick">{ok ? <Check size={13} /> : <Moon size={13} />}</span>
+          <motion.li key={title} layout="position" data-ok={i < done ? ok : "pending"}>
+            <span className="tick">{i >= done ? <Spinner size={12} className="spin" /> : ok ? <Check size={13} /> : <Moon size={13} />}</span>
             <span>{title}</span>
             <span className="muted">{detail}</span>
           </motion.li>
