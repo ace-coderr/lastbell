@@ -18,7 +18,7 @@ const REVERTS: Record<string, string> = {
 export function friendlyError(err: unknown): string {
   if (err instanceof BaseError) {
     if (err.walk((e) => e instanceof UserRejectedRequestError) || /user rejected|denied/i.test(err.shortMessage)) {
-      return "You rejected the request in your wallet.";
+      return "You rejected the request in your wallet. Nothing was spent and no order was placed.";
     }
     if (err.walk((e) => e instanceof InsufficientFundsError)) return "Not enough ETH on Robinhood Chain to pay for gas.";
     if (/chain mismatch|does not match the target chain/i.test(err.message)) return "Your wallet is on another network. Switch to Robinhood Chain.";
@@ -33,3 +33,6 @@ export function friendlyError(err: unknown): string {
   if (err instanceof Error) return err.message;
   return "Something went wrong.";
 }
+
+/** A rejected request is the person's own choice, not a failure: show it calmly and say nothing was spent. */
+export const isRejection = (message: string) => /^You rejected/.test(message);

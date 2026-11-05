@@ -2,7 +2,7 @@ import { lastbellAbi } from "@lastbell/shared";
 import { ContractFunctionRevertedError, UserRejectedRequestError, encodeErrorResult } from "viem";
 import { describe, expect, it } from "vitest";
 import { toPlaceArgs } from "../src/chain/actions.js";
-import { friendlyError } from "../src/chain/errors.js";
+import { friendlyError, isRejection } from "../src/chain/errors.js";
 import { stateOf, type UiMarket, type UiOrder } from "../src/model.js";
 import type { OrderDraft } from "../src/screens/Trade.js";
 
@@ -42,7 +42,12 @@ describe("toPlaceArgs", () => {
 
 describe("friendlyError", () => {
   it("explains a wallet rejection", () => {
-    expect(friendlyError(new UserRejectedRequestError(new Error("User rejected the request.")))).toBe("You rejected the request in your wallet.");
+    expect(friendlyError(new UserRejectedRequestError(new Error("User rejected the request.")))).toBe("You rejected the request in your wallet. Nothing was spent and no order was placed.");
+  });
+
+  it("treats a rejection as a calm notice, not a failure", () => {
+    expect(isRejection(friendlyError(new UserRejectedRequestError(new Error("x"))))).toBe(true);
+    expect(isRejection("Not enough ETH on Robinhood Chain to pay for gas.")).toBe(false);
   });
 
   it("translates contract errors into plain words", () => {

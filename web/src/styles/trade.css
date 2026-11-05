@@ -488,3 +488,60 @@
     transform: none;
   }
 }
+
+/* ---- states */
+
+.empty {
+  display: grid;
+  gap: var(--sp-3);
+  justify-items: start;
+  max-width: 640px;
+  margin: 0 auto;
+}
+.empty h3 {
+  margin: 0;
+  font-size: var(--fs-xl);
+  letter-spacing: -0.02em;
+}
+.empty p {
+  margin: 0;
+}
+.empty-steps {
+  margin: 0;
+  padding-left: 1.2em;
+  display: grid;
+  gap: var(--sp-2);
+  color: var(--muted);
+}
+.empty-steps b {
+  color: var(--fg);
+}
+.empty-skel {
+  display: grid;
+  gap: var(--sp-3);
+}
+.empty-skel .skeleton {
+  height: 150px;
+  border-radius: var(--radius-cell);
+}
+.notice-strip .stack {
+  padding-bottom: 12px;
+}
+
+.footer-brand a.num {
+  display: inline-flex;
+  align-items: center;
+  min-height: var(--tap);
+}
+
+@media (max-width: 600px) {
+  .banner {
+    flex-wrap: wrap;
+  }
+  .network-banner .grow {
+    flex: 1 1 calc(100% - 32px);
+  }
+  .network-banner .btn {
+    width: 100%;
+  }
+}

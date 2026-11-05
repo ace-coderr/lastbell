@@ -57,6 +57,22 @@ export function WalletButton({ block }: { block?: boolean }) {
   );
 }
 
+/** The wrong-network notice itself, with no wallet logic, so it can also be previewed. */
+export function NetworkNotice({ switching, error, onSwitch }: { switching?: boolean; error?: string | null; onSwitch?: () => void }) {
+  return (
+    <motion.div className="banner network-banner" data-tone="error" role="alert" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
+      <Alert size={16} />
+      <span className="grow">
+        Your wallet is on another network, so orders are paused. Lastbell runs on <strong>{appChain.name}</strong>. Switching does not move any funds.
+        {error && <> {error}</>}
+      </span>
+      <button className="btn btn-primary" disabled={switching} onClick={onSwitch}>
+        {switching ? "Switching…" : `Switch to ${appChain.name}`}
+      </button>
+    </motion.div>
+  );
+}
+
 /** Shown whenever the wallet is on any chain other than Robinhood Chain. */
 export function NetworkBanner() {
   const { wrongNetwork } = useWalletState();
@@ -64,25 +80,17 @@ export function NetworkBanner() {
   const [error, setError] = useState<string | null>(null);
   if (!wrongNetwork) return null;
   return (
-    <motion.div className="banner network-banner" data-tone="error" role="alert" initial={{ opacity: 0, y: -8 }} animate={{ opacity: 1, y: 0 }}>
-      <Alert size={16} />
-      <span className="grow">
-        Your wallet is on another network. Lastbell runs on <strong>{appChain.name}</strong>.{error && <> {error}</>}
-      </span>
-      <button
-        className="btn btn-primary"
-        disabled={isPending}
-        onClick={async () => {
-          setError(null);
-          try {
-            await switchChainAsync({ chainId: appChain.id });
-          } catch (err) {
-            setError(friendlyError(err));
-          }
-        }}
-      >
-        {isPending ? "Switching…" : `Switch to ${appChain.name}`}
-      </button>
-    </motion.div>
+    <NetworkNotice
+      switching={isPending}
+      error={error}
+      onSwitch={async () => {
+        setError(null);
+        try {
+          await switchChainAsync({ chainId: appChain.id });
+        } catch (err) {
+          setError(friendlyError(err));
+        }
+      }}
+    />
   );
 }

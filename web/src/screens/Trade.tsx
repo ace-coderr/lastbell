@@ -319,7 +319,7 @@ function Ticket({ market, clock, now, action, minFeeWif }: { market: UiMarket; c
         <div className="banner" data-tone="night">
           <Moon size={16} />
           <span className="grow">
-            Placing now is fine. It waits, and can't fire on a frozen weekend price. Earliest fill: {localWhen(clock.nextOpen)}.
+            The US market is closed, so this order will be queued until it opens in {formatCountdown(clock.nextOpen - now)} ({localWhen(clock.nextOpen)}). It cannot fire on a frozen price, and you can cancel before then.
           </span>
         </div>
       )}

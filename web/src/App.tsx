@@ -6,8 +6,9 @@ import { useLiveFlywheel, useLiveMarkets, useLiveOrders, useMinFee } from "./cha
 import { Navbar, type Screen } from "./components/Navbar.js";
 import { Footer } from "./components/Footer.js";
 import { RegionGate } from "./components/RegionGate.js";
-import { NetworkBanner, WalletButton, useConnectWallet, useWalletState } from "./components/Wallet.js";
-import { Alert, Spinner } from "./components/icons.js";
+import { NetworkBanner, NetworkNotice, WalletButton, useConnectWallet, useWalletState } from "./components/Wallet.js";
+import { isRejection } from "./chain/errors.js";
+import { Alert, Clock, Spinner } from "./components/icons.js";
 import { DEMO, LOCAL } from "./config.js";
 import { demoFlywheel, demoMarkets, demoOrders } from "./demo.js";
 import { demoClockOffset, useNow } from "./lib/useNow.js";
@@ -21,6 +22,9 @@ const screenFromHash = (): Screen => {
   const h = window.location.hash.replace("#", "");
   return h === "orders" || h === "flywheel" ? h : "trade";
 };
+
+/** Demo-only: ?demo&preview=wrong-network|stale|empty|pending|rejected|failed|disconnected shows a state without a wallet. */
+const PREVIEW = DEMO ? new URLSearchParams(window.location.search).get("preview") : null;
 
 export function App() {
   const [clockOffset] = useState(() => (DEMO ? demoClockOffset() : 0));
@@ -64,7 +68,7 @@ export function App() {
   const [demoPending, setDemoPending] = useState<Record<string, boolean>>({});
 
   const markets = DEMO ? demoMarketList : live.markets;
-  const orders = DEMO ? demoOrderList : liveOrders.orders;
+  const orders = DEMO ? (PREVIEW === "empty" ? [] : demoOrderList) : liveOrders.orders;
   const stats = DEMO ? demoStats : liveStats;
 
   const place = async (d: OrderDraft) => {
@@ -101,6 +105,41 @@ export function App() {
         <button className="btn btn-primary btn-lg" disabled>
           {region.status === "blocked" ? "Not available in your region" : "Region not confirmed"}
         </button>
+      );
+    }
+    if (DEMO && PREVIEW === "disconnected") {
+      return (
+        <div className="action-stack">
+          <button className="btn btn-primary btn-lg">Connect wallet to place</button>
+          <span className="steps">Your wallet is only asked for a signature when you place or cancel.</span>
+        </div>
+      );
+    }
+    if (DEMO && PREVIEW === "wrong-network") {
+      return (
+        <button className="btn btn-primary btn-lg" disabled>
+          Switch network first
+        </button>
+      );
+    }
+    if (DEMO && PREVIEW === "pending") {
+      return (
+        <div className="action-stack">
+          <button className="btn btn-primary btn-lg" disabled>
+            <Spinner size={14} className="spin" /> Placing order… confirm in your wallet
+          </button>
+          <span className="steps">Step 2 of 2 · nothing moves until you confirm</span>
+        </div>
+      );
+    }
+    if (DEMO && (PREVIEW === "rejected" || PREVIEW === "failed")) {
+      return (
+        <div className="action-stack">
+          <button className="btn btn-primary btn-lg" disabled={!d}>
+            {label} (demo)
+          </button>
+          <Notice text={PREVIEW === "rejected" ? "You rejected the request in your wallet. Nothing was spent and no order was placed." : "The transaction failed on chain, so no order was placed and your tokens did not move. Check the amount and try again."} />
+        </div>
       );
     }
     if (DEMO) {
@@ -152,17 +191,42 @@ export function App() {
 
   const ordersEmpty =
     !DEMO && !wallet.isConnected ? (
-      <div className="empty card card-pad">
-        <p className="muted">Connect your wallet to see your orders.</p>
+      <div className="empty cell cell-pad">
+        <span className="label">Not connected</span>
+        <h3>Connect your wallet to see your orders</h3>
+        <p className="muted">Orders live on chain and belong to your address. Connecting only lets this page read them.</p>
         <button className="btn btn-primary" onClick={connect}>
           Connect wallet
         </button>
       </div>
+    ) : liveOrders.loading && !DEMO ? (
+      <div className="empty-skel" aria-busy="true" aria-label="Loading your orders">
+        <span className="skeleton" />
+        <span className="skeleton" />
+      </div>
     ) : (
-      <div className="empty card card-pad">
-        <p className="muted">{liveOrders.loading ? "Loading your orders…" : "No orders yet. Place one on the Trade screen."}</p>
+      <div className="empty cell cell-pad">
+        <span className="label">No orders yet</span>
+        <h3>Your first stop-loss takes about a minute</h3>
+        <ol className="empty-steps">
+          <li>
+            <b>Pick a market and a trigger.</b> For example, sell 2 SPY if it falls 3%.
+          </li>
+          <li>
+            <b>Prepay the keeper fee.</b> Half is burned, half pays the keeper.
+          </li>
+          <li>
+            <b>Watch it here.</b> It waits for a fresh price, and you can cancel any time.
+          </li>
+        </ol>
+        <button className="btn btn-primary" onClick={() => go("trade")}>
+          Set up a stop-loss
+        </button>
       </div>
     );
+
+  // The oracle is not updating during a session: say so, because orders will keep waiting.
+  const stale = PREVIEW === "stale" || (markets.length > 0 && clock.open && markets.every((m) => m.gate !== "fresh"));
 
   return (
     <>
@@ -174,6 +238,15 @@ export function App() {
         <div className="wrap stack">
           <RegionGate region={region} />
           {!DEMO && <NetworkBanner />}
+          {DEMO && PREVIEW === "wrong-network" && <NetworkNotice />}
+          {stale && (
+            <div className="banner" data-tone="warn" role="status">
+              <Clock size={16} />
+              <span className="grow">
+                <strong>Prices are not fresh right now.</strong> The market is open but the price feed has not updated, so orders keep waiting instead of firing on old data. Nothing is lost, and you can cancel any time.
+              </span>
+            </div>
+          )}
         </div>
       </div>
 
@@ -230,8 +303,9 @@ export function App() {
 }
 
 function Notice({ text }: { text: string }) {
+  const calm = isRejection(text);
   return (
-    <div className="banner" data-tone="error" role="alert">
+    <div className="banner" data-tone={calm ? "warn" : "error"} role="alert">
       <Alert size={16} />
       <span className="grow">{text}</span>
     </div>
