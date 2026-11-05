@@ -26,7 +26,7 @@ export function FlywheelScreen({ stats, markets, now }: { stats: FlywheelStats; 
             <p className="hero-sub">Follow one fee from the moment you place an order to the moment it is gone.</p>
           </header>
 
-          <div className="bento bento-4 fw-tiles">
+          <div className="bento bento-2 joined fw-tiles">
             <Tile label="WIF burned" icon={<Flame size={14} />}>
               <TickingNumber className="stat-value num burn-text" value={burned} format={(n) => Math.round(n).toLocaleString("en-US")} />
               <span className="muted stat-note">
@@ -102,7 +102,7 @@ export function FlywheelScreen({ stats, markets, now }: { stats: FlywheelStats; 
             <p className="muted">A keeper that does its job earns. A keeper that does not loses bond.</p>
           </div>
 
-          <div className="bento bento-2">
+          <div className="bento bento-2 joined">
             <div className="cell cell-pad fw-keepers">
               <div className="fw-cell-head">
                 <span className="label">Keeper status</span>

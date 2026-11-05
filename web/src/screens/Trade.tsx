@@ -1,10 +1,12 @@
 import { QUEUE_REASON_TEXT, type MarketClock } from "@lastbell/shared";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
-import { BondSlashArt, BurnFlywheelArt, CustodyArt, FreshGuardArt } from "../components/dots.js";
+import { HeroField, BondSlashArt, BurnFlywheelArt, CustodyArt, FreshGuardArt } from "../components/dots.js";
 import { Check, Flame, Moon, Shield, ArrowDown, Spinner } from "../components/icons.js";
 import { TickingNumber } from "../components/Ticking.js";
 import { localWhen, num, pct, usd, wif } from "../lib/format.js";
+import { EXPLORER_CONTRACT_URL } from "../links.js";
+import { defaultAmount } from "../lib/defaults.js";
 import { formatCountdown } from "../lib/time.js";
 import type { FlywheelStats, OrderKind, UiMarket } from "../model.js";
 
@@ -41,13 +43,22 @@ export function TradeScreen(props: {
   return (
     <>
       <section className="section section-dark hero-section" data-band="none">
-        <div className="wrap">
+        <HeroField />
+        <div className="wrap hero-wrap">
           <div className="hero">
             <p className="label hero-label">Stock Token orders · Robinhood Chain {props.badge}</p>
             <h1 className="display hero-title">
               Stop-losses that <em>sleep</em> when the market sleeps.
             </h1>
             <p className="hero-sub">Orders fire only on a fresh price the pool agrees with. Otherwise they wait, and you can cancel any time.</p>
+            <div className="hero-links">
+              <a className="btn btn-ghost" href="#how" onClick={jump("how")}>
+                How it works
+              </a>
+              <a className="btn btn-ghost" href="#flywheel">
+                See the flywheel
+              </a>
+            </div>
           </div>
 
           {markets.length === 0 && <MarketSkeleton />}
@@ -65,7 +76,7 @@ export function TradeScreen(props: {
       <section className="section section-light" data-band="coral" id="how">
         <div className="wrap">
           <SectionHead n="01" title="How it works" sub="Three steps. You never hand over your tokens." />
-          <div className="bento bento-3">
+          <div className="bento bento-3 joined">
             {HOW.map(([n, title, body]) => (
               <Reveal key={n} className="cell cell-pad how-cell">
                 <span className="label">{n}</span>
@@ -80,7 +91,7 @@ export function TradeScreen(props: {
       <section className="section section-ink" data-band="lilac" id="why">
         <div className="wrap">
           <SectionHead n="02" title="Built so it cannot misfire" sub="Four rules, enforced by the contract rather than by trust." />
-          <div className="bento bento-2">
+          <div className="bento bento-2 joined">
             {BENTO.map(({ n, title, body, art }) => (
               <Reveal key={n} className="cell cell-pad bento-cell">
                 <div className="bento-art">{art}</div>
@@ -94,8 +105,15 @@ export function TradeScreen(props: {
       </section>
 
       <section className="section section-light" data-band="mint" id="proof">
-        <div className="wrap">
-          <SectionHead n="03" title="Live from the chain" sub="Read from the contract and the keeper, not typed in." />
+        <div className="wrap proof-split">
+          <div className="proof-copy">
+            <span className="label">03</span>
+            <h2 className="display">Live from the chain</h2>
+            <p className="muted">Read from the contract and the keeper, not typed in. Every number here can be checked on the explorer.</p>
+            <a className="btn btn-primary" href={EXPLORER_CONTRACT_URL} target="_blank" rel="noreferrer">
+              Read the contract
+            </a>
+          </div>
           <StatTiles stats={stats} markets={markets} />
         </div>
       </section>
@@ -115,6 +133,12 @@ const BENTO: { n: string; title: string; body: string; art: ReactNode }[] = [
   { n: "03", title: "Burn flywheel", body: "Every fee is split: half is burned for good, half pays the keeper that filled the order. More orders mean more burn.", art: <BurnFlywheelArt /> },
   { n: "04", title: "You keep custody", body: "No owner, no admin keys, no pause button. You can cancel and withdraw at any time, even if every keeper disappears.", art: <CustodyArt /> },
 ];
+
+/** Smooth-scrolls to a section without touching the hash, which the app uses for screens. */
+const jump = (id: string) => (e: { preventDefault: () => void }) => {
+  e.preventDefault();
+  document.getElementById(id)?.scrollIntoView({ behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
+};
 
 function SectionHead({ n, title, sub }: { n: string; title: string; sub: string }) {
   return (
@@ -144,7 +168,7 @@ function StatTiles({ stats, markets }: { stats?: FlywheelStats; markets: UiMarke
     { label: "Markets live", value: markets.length ? live : undefined, fmt: (n) => `${Math.round(n)} of ${markets.length}`, note: "with a fresh price right now" },
   ];
   return (
-    <div className="bento bento-4">
+    <div className="bento bento-2 joined stat-grid">
       {tiles.map((t) => (
         <div key={t.label} className="cell cell-pad stat-tile">
           <span className="label">{t.label}</span>
@@ -185,12 +209,12 @@ function MarketCard({ m, active, onSelect, now }: { m: UiMarket; active: boolean
       <div className="market-price num"><TickingNumber value={m.price} format={usd} /></div>
       <div className="market-meta">
         {m.gate === "fresh" ? (
-          <span className="live">
-            <span className="live-dot" /> live · {Math.round((now - m.updatedAt) / 60)} min old
+          <span className="live" title={`Chainlink price updated ${Math.round((now - m.updatedAt) / 60)} min ago, inside this session`}>
+            <span className="live-dot" /> fresh this session
           </span>
         ) : (
-          <span className="frozen">
-            <Moon size={12} /> frozen
+          <span className="frozen" title={QUEUE_REASON_TEXT[m.gate]}>
+            <Moon size={12} /> {m.gate === "market-closed" ? "closed · price frozen" : "stale · not trusted"}
           </span>
         )}
         <span className="muted num">pool {pct(drift)}</span>
@@ -202,7 +226,7 @@ function MarketCard({ m, active, onSelect, now }: { m: UiMarket; active: boolean
 
 function Ticket({ market, clock, now, action, minFeeWif }: { market: UiMarket; clock: MarketClock; now: number; action: (d: OrderDraft | null) => ReactNode; minFeeWif: number }) {
   const [kind, setKind] = useState<OrderKind>("stop");
-  const [amount, setAmount] = useState("2");
+  const [amount, setAmount] = useState(() => defaultAmount("stop", market.price));
   const [trigger, setTrigger] = useState("");
   const [slippageBps, setSlippage] = useState(100);
   const [expiryDays, setExpiry] = useState(7);
@@ -212,7 +236,7 @@ function Ticket({ market, clock, now, action, minFeeWif }: { market: UiMarket; c
   // Sensible defaults whenever the market or side changes: 3% below the live price.
   useEffect(() => {
     setTrigger((market.price * 0.97).toFixed(2));
-    setAmount(kind === "stop" ? "2" : "1000");
+    setAmount(defaultAmount(kind, market.price));
   }, [market.symbol, kind]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const t = Number(trigger);

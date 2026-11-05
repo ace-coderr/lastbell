@@ -545,3 +545,180 @@
     width: 100%;
   }
 }
+
+/* ---- reference pass: joined grids, markers at intersections, short two-tone bands, hero field */
+
+.joined {
+  --mk: var(--coral);
+  position: relative;
+  gap: 1px;
+  background: var(--line-strong);
+  border: 1px solid var(--line-strong);
+}
+
+.joined > .cell {
+  border: 0;
+  border-radius: 0;
+  background: var(--surface);
+  position: relative;
+}
+
+/* square markers straddle every grid intersection: top-left and bottom-right of each cell, plus two on the container */
+.joined > .cell::before,
+.joined > .cell::after,
+.joined::before,
+.joined::after {
+  content: "";
+  position: absolute;
+  width: 7px;
+  height: 7px;
+  background: var(--mk);
+  z-index: 2;
+  pointer-events: none;
+}
+.joined > .cell::before {
+  left: -4px;
+  top: -4px;
+}
+.joined > .cell::after {
+  right: -4px;
+  bottom: -4px;
+}
+.joined::before {
+  right: -4px;
+  top: -4px;
+}
+.joined::after {
+  left: -4px;
+  bottom: -4px;
+}
+
+.bento-cell {
+  display: flex;
+  flex-direction: column;
+  gap: var(--sp-2);
+  min-height: 360px;
+  padding: var(--sp-5);
+}
+.bento-cell > .label {
+  order: -2;
+}
+.bento-art {
+  order: -1;
+  flex: 1;
+  display: grid;
+  place-items: center;
+  margin: var(--sp-3) 0 var(--sp-4);
+  padding: 0;
+  border: 0;
+  background: none;
+}
+.bento-art .dm {
+  max-height: 190px;
+}
+.bento-cell h3 {
+  margin-top: 0;
+}
+@media (max-width: 760px) {
+  .bento-cell {
+    min-height: 0;
+  }
+}
+
+.how-cell {
+  min-height: 220px;
+  align-content: space-between;
+}
+
+/* short two-tone band near the top-left of each section, like a tab */
+.section::before {
+  inset: 0 auto auto 0;
+  width: 100%;
+  background: linear-gradient(90deg, transparent 0 9%, var(--band, var(--coral)) 9% 24%, var(--band-2, var(--lilac)) 24% 33%, transparent 33%);
+}
+.section[data-band="coral"] {
+  --band: var(--coral);
+  --band-2: var(--cream-2);
+}
+.section[data-band="lilac"] {
+  --band: var(--lilac);
+  --band-2: var(--coral);
+}
+.section[data-band="mint"] {
+  --band: var(--mint);
+  --band-2: var(--lilac);
+}
+.section[data-band="split"]::before {
+  background: linear-gradient(90deg, var(--coral) 0 34%, var(--lilac) 34% 67%, var(--mint) 67% 100%);
+}
+@media (max-width: 760px) {
+  .section::before {
+    background: linear-gradient(90deg, transparent 0 4%, var(--band, var(--coral)) 4% 30%, var(--band-2, var(--lilac)) 30% 44%, transparent 44%);
+  }
+  .section[data-band="split"]::before {
+    background: linear-gradient(90deg, var(--coral) 0 34%, var(--lilac) 34% 67%, var(--mint) 67% 100%);
+  }
+}
+
+.hero-section {
+  position: relative;
+  overflow: hidden;
+}
+.hero-wrap {
+  position: relative;
+  z-index: 1;
+}
+.hero-field {
+  position: absolute;
+  left: 0;
+  top: 24px;
+  width: 100%;
+  height: auto;
+  max-height: none;
+  opacity: 0.6;
+  pointer-events: none;
+  -webkit-mask-image: linear-gradient(to bottom, #000 25%, transparent 95%);
+  mask-image: linear-gradient(to bottom, #000 25%, transparent 95%);
+}
+.hero-links {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--sp-3);
+  margin-top: var(--sp-2);
+}
+
+/* proof: headline and button left, joined stat cells right */
+.proof-split {
+  display: grid;
+  grid-template-columns: 1fr 1.25fr;
+  gap: clamp(24px, 5vw, 72px);
+  align-items: center;
+}
+.proof-copy {
+  display: grid;
+  gap: var(--sp-3);
+  justify-items: start;
+}
+.proof-copy h2 {
+  margin: 0;
+  font-size: var(--fs-2xl);
+}
+.proof-copy p {
+  margin: 0;
+  max-width: 42ch;
+}
+.stat-grid .stat-tile {
+  min-height: 150px;
+  align-content: space-between;
+}
+@media (max-width: 860px) {
+  .proof-split {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 420px) {
+  .stat-grid.bento-2 {
+    grid-template-columns: 1fr;
+  }
+}

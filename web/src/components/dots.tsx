@@ -120,3 +120,37 @@ export function CustodyArt() {
     </Frame>
   );
 }
+
+/** A wide, faint dot-matrix landscape behind the hero: two ridges of dots rising out of a field. */
+export function HeroField() {
+  const cols = 96;
+  const rows = 26;
+  const dots: ReactNode[] = [];
+  for (let c = 0; c < cols; c++) {
+    const ridge = 8 + 3.6 * Math.sin(c / 7.5) + 1.8 * Math.sin(c / 3.1 + 1);
+    for (let r = 0; r < rows; r++) {
+      const below = r - ridge;
+      if (below < 0) continue;
+      const fade = Math.max(0, 1 - below / 12);
+      if (fade <= 0.05) continue;
+      const hot = below < 1.2;
+      dots.push(
+        <circle
+          key={`${c}-${r}`}
+          className={hot ? "dm-blink" : undefined}
+          cx={c * P + P / 2}
+          cy={r * P + P / 2}
+          r={hot ? 2.2 : 1.4}
+          fill={hot ? "var(--coral)" : "var(--lilac)"}
+          opacity={hot ? 0.75 : 0.22 * fade + 0.04}
+          style={hot ? { animationDelay: `${(c % 17) * 0.23}s` } : undefined}
+        />,
+      );
+    }
+  }
+  return (
+    <svg className="hero-field dm" viewBox={`0 0 ${cols * P} ${rows * P}`} preserveAspectRatio="xMidYMin meet" aria-hidden="true">
+      {dots}
+    </svg>
+  );
+}
