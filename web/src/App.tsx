@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLastbellActions } from "./chain/actions.js";
 import { useLiveFlywheel, useLiveMarkets, useLiveOrders, useMinFee } from "./chain/live.js";
 import { Navbar, type Screen } from "./components/Navbar.js";
+import { Footer } from "./components/Footer.js";
 import { RegionGate } from "./components/RegionGate.js";
 import { NetworkBanner, WalletButton, useConnectWallet, useWalletState } from "./components/Wallet.js";
 import { Alert, Spinner } from "./components/icons.js";
@@ -172,8 +173,7 @@ export function App() {
         </div>
       </div>
 
-      <main id="main" className="section section-dark" data-band="none">
-        <div className="wrap">
+      <main id="main">
           <AnimatePresence mode="wait">
             <motion.div key={screen} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
               {screen === "trade" && (
@@ -183,9 +183,13 @@ export function App() {
                   now={now}
                   action={ticketAction}
                   minFeeWif={DEMO ? undefined : (contractMinFee ?? 50)}
+                  stats={stats}
                   badge={DEMO ? <span className="demo-badge">demo data</span> : LOCAL ? <span className="demo-badge">local test chain</span> : null}
                 />
               )}
+              {screen !== "trade" && (
+                <section className="section section-dark" data-band="none">
+                  <div className="wrap">
               {screen === "orders" && (
                 <OrdersScreen
                   orders={orders}
@@ -204,10 +208,13 @@ export function App() {
                 ) : (
                   <p className="muted loading-note">Reading the flywheel from chain…</p>
                 ))}
+                  </div>
+                </section>
+              )}
             </motion.div>
           </AnimatePresence>
-        </div>
       </main>
+      <Footer />
     </>
   );
 }

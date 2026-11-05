@@ -1,10 +1,12 @@
 import { QUEUE_REASON_TEXT, type MarketClock } from "@lastbell/shared";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
+import { BondSlashArt, BurnFlywheelArt, CustodyArt, FreshGuardArt } from "../components/dots.js";
 import { Check, Flame, Moon, Shield, ArrowDown } from "../components/icons.js";
+import { TickingNumber } from "../components/Ticking.js";
 import { localWhen, num, pct, usd, wif } from "../lib/format.js";
 import { formatCountdown } from "../lib/time.js";
-import type { OrderKind, UiMarket } from "../model.js";
+import type { FlywheelStats, OrderKind, UiMarket } from "../model.js";
 
 export interface OrderDraft {
   market: UiMarket;
@@ -30,35 +32,136 @@ export function TradeScreen(props: {
   badge?: ReactNode;
   /** Minimum keeper fee in WIF. Live mode reads it from the contract. */
   minFeeWif?: number;
+  stats?: FlywheelStats;
 }) {
-  const { markets, clock, now } = props;
+  const { markets, clock, now, stats } = props;
   const [selected, setSelected] = useState(0);
   const market = markets[selected] ?? markets[0];
 
   return (
-    <div className="trade">
-      <section className="hero">
-        <p className="label hero-label">
-          Stock Token orders · Robinhood Chain {props.badge}
-        </p>
-        <h1 className="display hero-title">
-          Stop-losses that <em>sleep</em> when the market sleeps.
-        </h1>
-        <p className="hero-sub">
-          Stock Tokens trade all weekend but their prices freeze. Lastbell orders only fire on a fresh price that the pool agrees with.
-          Otherwise they wait, and you can cancel any time.
-        </p>
+    <>
+      <section className="section section-dark hero-section" data-band="none">
+        <div className="wrap">
+          <div className="hero">
+            <p className="label hero-label">Stock Token orders · Robinhood Chain {props.badge}</p>
+            <h1 className="display hero-title">
+              Stop-losses that <em>sleep</em> when the market sleeps.
+            </h1>
+            <p className="hero-sub">Orders fire only on a fresh price the pool agrees with. Otherwise they wait, and you can cancel any time.</p>
+          </div>
+
+          {markets.length === 0 && <MarketSkeleton />}
+          <div className="trade-grid">
+            <div className="market-list" role="radiogroup" aria-label="Market">
+              {markets.map((m, i) => (
+                <MarketCard key={m.symbol} m={m} active={i === selected} onSelect={() => setSelected(i)} now={now} />
+              ))}
+            </div>
+            {market && <Ticket market={market} clock={clock} now={now} action={props.action} minFeeWif={props.minFeeWif ?? DEFAULT_MIN_FEE_WIF} />}
+          </div>
+        </div>
       </section>
 
-      {markets.length === 0 && <p className="muted loading-note">Reading markets from chain…</p>}
-      <div className="trade-grid">
-        <div className="market-list" role="radiogroup" aria-label="Market">
-          {markets.map((m, i) => (
-            <MarketCard key={m.symbol} m={m} active={i === selected} onSelect={() => setSelected(i)} now={now} />
-          ))}
+      <section className="section section-light" data-band="coral" id="how">
+        <div className="wrap">
+          <SectionHead n="01" title="How it works" sub="Three steps. You never hand over your tokens." />
+          <div className="bento bento-3">
+            {HOW.map(([n, title, body]) => (
+              <Reveal key={n} className="cell cell-pad how-cell">
+                <span className="label">{n}</span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </Reveal>
+            ))}
+          </div>
         </div>
-        {market && <Ticket market={market} clock={clock} now={now} action={props.action} minFeeWif={props.minFeeWif ?? DEFAULT_MIN_FEE_WIF} />}
-      </div>
+      </section>
+
+      <section className="section section-ink" data-band="lilac" id="why">
+        <div className="wrap">
+          <SectionHead n="02" title="Built so it cannot misfire" sub="Four rules, enforced by the contract rather than by trust." />
+          <div className="bento bento-2">
+            {BENTO.map(({ n, title, body, art }) => (
+              <Reveal key={n} className="cell cell-pad bento-cell">
+                <div className="bento-art">{art}</div>
+                <span className="label">{n}</span>
+                <h3>{title}</h3>
+                <p>{body}</p>
+              </Reveal>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section section-light" data-band="mint" id="proof">
+        <div className="wrap">
+          <SectionHead n="03" title="Live from the chain" sub="Read from the contract and the keeper, not typed in." />
+          <StatTiles stats={stats} markets={markets} />
+        </div>
+      </section>
+    </>
+  );
+}
+
+const HOW: [string, string, string][] = [
+  ["01", "Set a trigger", "Pick a Stock Token, an amount and the price that should trigger it. Prepay the keeper fee in $WIF. Your tokens are escrowed in the contract."],
+  ["02", "A keeper watches", "Keepers bond $WIF and watch the price. They can only fire when the Chainlink price is fresh and the pool is within its band."],
+  ["03", "It fills or it waits", "If every check passes, the swap runs with a minimum output. If not, nothing happens and you can cancel for a full refund."],
+];
+
+const BENTO: { n: string; title: string; body: string; art: ReactNode }[] = [
+  { n: "01", title: "Fresh-price guard", body: "A frozen weekend price cannot trigger your order. The contract checks session hours, the oracle timestamp and the pool agreement first.", art: <FreshGuardArt /> },
+  { n: "02", title: "Keeper bond and slash", body: "Keepers lock $WIF to claim orders. Claim one and let it lapse while the price is fresh, and part of the bond is slashed and burned.", art: <BondSlashArt /> },
+  { n: "03", title: "Burn flywheel", body: "Every fee is split: half is burned for good, half pays the keeper that filled the order. More orders mean more burn.", art: <BurnFlywheelArt /> },
+  { n: "04", title: "You keep custody", body: "No owner, no admin keys, no pause button. You can cancel and withdraw at any time, even if every keeper disappears.", art: <CustodyArt /> },
+];
+
+function SectionHead({ n, title, sub }: { n: string; title: string; sub: string }) {
+  return (
+    <div className="section-head">
+      <span className="label">{n}</span>
+      <h2 className="display">{title}</h2>
+      <p className="muted">{sub}</p>
+    </div>
+  );
+}
+
+/** Fades and lifts into place when scrolled into view. */
+function Reveal({ className, children }: { className?: string; children: ReactNode }) {
+  return (
+    <motion.div className={className} initial={{ opacity: 0, y: 18 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, margin: "-40px" }} transition={{ duration: 0.45, ease: [0.22, 1, 0.36, 1] }}>
+      {children}
+    </motion.div>
+  );
+}
+
+function StatTiles({ stats, markets }: { stats?: FlywheelStats; markets: UiMarket[] }) {
+  const live = markets.filter((m) => m.gate === "fresh").length;
+  const tiles: { label: string; value?: number; fmt: (n: number) => string; note: string }[] = [
+    { label: "Orders filled", value: stats?.fills, fmt: (n) => num(Math.round(n)), note: stats ? `of ${num(stats.orders)} placed` : "" },
+    { label: "WIF burned", value: stats ? stats.burnedFromFees + stats.slashedBurned : undefined, fmt: wif, note: "fees and slashes, gone for good" },
+    { label: "Keeper bond", value: stats?.bonded, fmt: wif, note: "locked as a promise to do the job" },
+    { label: "Markets live", value: markets.length ? live : undefined, fmt: (n) => `${Math.round(n)} of ${markets.length}`, note: "with a fresh price right now" },
+  ];
+  return (
+    <div className="bento bento-4">
+      {tiles.map((t) => (
+        <div key={t.label} className="cell cell-pad stat-tile">
+          <span className="label">{t.label}</span>
+          {t.value === undefined ? <span className="skeleton stat-skel" aria-label="Loading" /> : <TickingNumber className="stat-value num" value={t.value} format={t.fmt} />}
+          <span className="muted stat-note">{t.note}</span>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function MarketSkeleton() {
+  return (
+    <div className="market-skel" aria-busy="true" aria-label="Reading markets from chain">
+      {[0, 1, 2].map((i) => (
+        <span key={i} className="skeleton" />
+      ))}
     </div>
   );
 }
@@ -79,7 +182,7 @@ function MarketCard({ m, active, onSelect, now }: { m: UiMarket; active: boolean
         <span className="ticker">{m.symbol}</span>
         <span className="muted market-name">{m.name}</span>
       </div>
-      <div className="market-price num">{usd(m.price)}</div>
+      <div className="market-price num"><TickingNumber value={m.price} format={usd} /></div>
       <div className="market-meta">
         {m.gate === "fresh" ? (
           <span className="live">
