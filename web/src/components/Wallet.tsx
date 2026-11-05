@@ -31,14 +31,14 @@ export function useConnectWallet() {
   return { connect, connecting: isPending, error };
 }
 
-export function WalletButton() {
+export function WalletButton({ block }: { block?: boolean }) {
   const { address, isConnected, wrongNetwork } = useWalletState();
   const { connect, connecting, error } = useConnectWallet();
   const { disconnect } = useDisconnect();
   if (!isConnected) {
     return (
       <span className="wallet">
-        <button className="btn btn-ghost" onClick={connect} disabled={connecting}>
+        <button className={`btn btn-primary ${block ? "btn-lg" : ""}`} onClick={connect} disabled={connecting}>
           {connecting ? "Connecting…" : "Connect wallet"}
         </button>
         {error && (
@@ -50,7 +50,7 @@ export function WalletButton() {
     );
   }
   return (
-    <button className={`btn btn-ghost wallet-pill ${wrongNetwork ? "is-wrong" : ""}`} onClick={() => disconnect()} title="Disconnect">
+    <button className={`btn btn-ghost wallet-pill ${block ? "btn-lg" : ""} ${wrongNetwork ? "is-wrong" : ""}`} onClick={() => disconnect()} title="Disconnect">
       <span className="wallet-dot" />
       <span className="num">{shortAddress(address!)}</span>
     </button>

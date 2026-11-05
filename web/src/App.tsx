@@ -3,8 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useState, type ReactNode } from "react";
 import { useLastbellActions } from "./chain/actions.js";
 import { useLiveFlywheel, useLiveMarkets, useLiveOrders, useMinFee } from "./chain/live.js";
-import { BellMark } from "./components/Bell.js";
-import { MarketClock } from "./components/MarketClock.js";
+import { Navbar, type Screen } from "./components/Navbar.js";
 import { RegionGate } from "./components/RegionGate.js";
 import { NetworkBanner, WalletButton, useConnectWallet, useWalletState } from "./components/Wallet.js";
 import { Alert, Spinner } from "./components/icons.js";
@@ -16,13 +15,6 @@ import type { UiOrder } from "./model.js";
 import { FlywheelScreen } from "./screens/Flywheel.js";
 import { OrdersScreen } from "./screens/Orders.js";
 import { TradeScreen, type OrderDraft } from "./screens/Trade.js";
-
-type Screen = "trade" | "orders" | "flywheel";
-const SCREENS: [Screen, string][] = [
-  ["trade", "Trade"],
-  ["orders", "Orders"],
-  ["flywheel", "Flywheel"],
-];
 
 const screenFromHash = (): Screen => {
   const h = window.location.hash.replace("#", "");
@@ -172,29 +164,16 @@ export function App() {
       <a className="skip-link" href="#main">
         Skip to content
       </a>
-      <div className="page">
-        <header className="topbar">
-          <a className="brand" href="#trade" onClick={() => go("trade")}>
-            <BellMark ringing={clock.open} />
-            lastbell
-          </a>
-          <nav className="nav" aria-label="Screens">
-            {SCREENS.map(([key, label]) => (
-              <button key={key} aria-current={screen === key ? "page" : undefined} onClick={() => go(key)}>
-                {screen === key && <motion.span layoutId="nav-pill" className="nav-pill" transition={{ type: "spring", stiffness: 500, damping: 40 }} />}
-                {label}
-              </button>
-            ))}
-          </nav>
-          <div className="topbar-right">
-            <MarketClock clock={clock} now={now} />
-            {!DEMO && <WalletButton />}
-          </div>
-        </header>
-        <RegionGate region={region} />
-        {!DEMO && <NetworkBanner />}
+      <Navbar screen={screen} go={go} clock={clock} now={now} wallet={(o) => (DEMO ? null : <WalletButton block={o.block} />)} />
+      <div className="notice-strip">
+        <div className="wrap stack">
+          <RegionGate region={region} />
+          {!DEMO && <NetworkBanner />}
+        </div>
+      </div>
 
-        <main id="main">
+      <main id="main" className="section section-dark" data-band="none">
+        <div className="wrap">
           <AnimatePresence mode="wait">
             <motion.div key={screen} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}>
               {screen === "trade" && (
@@ -227,8 +206,8 @@ export function App() {
                 ))}
             </motion.div>
           </AnimatePresence>
-        </main>
-      </div>
+        </div>
+      </main>
     </>
   );
 }

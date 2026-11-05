@@ -1,0 +1,25 @@
+/*
+ * TEMPORARY aliases so screens that have not been rebuilt yet keep rendering in the new palette.
+ * Removed when the Orders and Flywheel screens are re-skinned.
+ */
+:root {
+  --brass: var(--coral);
+  --brass-hover: var(--coral-hover);
+  --brass-soft: rgba(255, 122, 89, 0.14);
+  --brass-line: rgba(255, 122, 89, 0.5);
+  --on-brass: var(--ink-950);
+  --armed-soft: rgba(185, 180, 240, 0.14);
+  --queued-soft: rgba(155, 166, 242, 0.14);
+  --executing-soft: rgba(255, 122, 89, 0.15);
+  --filled-soft: rgba(123, 224, 179, 0.13);
+  --expired-soft: rgba(138, 142, 179, 0.14);
+  --error-soft: rgba(255, 107, 139, 0.13);
+  --surface-3: var(--ink-800);
+  --text: var(--fg);
+  --text-2: var(--muted-dark);
+  --font-display: var(--font-text);
+  --font-body: var(--font-text);
+  --radius-lg: var(--radius-cell);
+  --shadow: none;
+  --bg-glow: transparent;
+}

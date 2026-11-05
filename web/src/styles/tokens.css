@@ -1,61 +1,50 @@
 /*
- * Lastbell design tokens: the single source for colour, type, space, radius and motion.
+ * Lastbell design tokens: the ONE place for colour, type, space, radius and motion.
  *
- * The page has two moods, switched by data-session on <html> from the live market clock:
- *   open   → "trading floor": deep slate with warm brass light.
- *   closed → "after hours": the room dims to night blue and orders visibly go to sleep.
- * Brass is the one accent (the bell). State colours are reserved for order states only.
+ * Dusk ink and cream sections alternate down the page. Coral is the single accent, pale lilac is secondary,
+ * mint is reserved for live / fresh / OK status, and rose is reserved for errors.
+ * Each section re-binds the semantic variables (--bg, --fg, --muted, --line, ...), so components never
+ * hard-code a colour: they read the variables and work on either background.
  */
 :root {
-  /* Surfaces: trading floor */
-  --bg: #12110f;
-  --bg-glow: rgba(232, 176, 74, 0.1);
-  --surface: #1b1916;
-  --surface-2: #24211d;
-  --surface-3: #2e2a25;
-  --line: #36312a;
-  --line-strong: #4d463c;
+  /* palette */
+  --ink-950: #0a0d26;
+  --ink-900: #12163a;
+  --ink-850: #181d46;
+  --ink-800: #1f2554;
+  --cream: #f7f2ea;
+  --cream-2: #eee7db;
+  --paper: #fffdf9;
+  --coral: #ff7a59;
+  --coral-hover: #ff9276;
+  --coral-deep: #b73a17; /* coral text on cream: 5.4:1 */
+  --lilac: #b9b4f0;
+  --lilac-deep: #4f49ad; /* lilac text on cream: 6.6:1 */
+  --mint: #7be0b3;
+  --mint-deep: #0f6e4b; /* mint text on cream: 5.6:1 */
+  --rose: #ff6b8b; /* errors only */
+  --rose-deep: #b3173f;
+  --muted-dark: #a6a9c9;
+  --muted-light: #50557a;
+  --text-dark: #f4f2ff;
+  --text-light: #0a0d26;
+  --line-dark: rgba(185, 180, 240, 0.18);
+  --line-dark-strong: rgba(185, 180, 240, 0.36);
+  --line-light: rgba(18, 22, 58, 0.16);
+  --line-light-strong: rgba(18, 22, 58, 0.34);
 
-  /* Text (AA on every surface above) */
-  --text: #f4eee4;
-  --text-2: #d2c8b9;
-  --muted: #a3988a;
-
-  /* Brass accent */
-  --brass: #e8b04a;
-  --brass-hover: #f2c46d;
-  --brass-soft: rgba(232, 176, 74, 0.13);
-  --brass-line: rgba(232, 176, 74, 0.45);
-  --on-brass: #1a1206;
-
-  /* Order states, one colour each */
-  --armed: #7fb2ff; /* watching the price */
-  --armed-soft: rgba(127, 178, 255, 0.13);
-  --queued: #b7a6ff; /* asleep until the market opens */
-  --queued-soft: rgba(183, 166, 255, 0.14);
-  --executing: #e8b04a; /* a keeper is on it */
-  --executing-soft: rgba(232, 176, 74, 0.15);
-  --filled: #6fdc9b;
-  --filled-soft: rgba(111, 220, 155, 0.13);
-  --expired: #8f877c;
-  --expired-soft: rgba(143, 135, 124, 0.14);
-  --error: #ff8a7a;
-  --error-soft: rgba(255, 138, 122, 0.13);
-  --burn: #ff7a3d; /* $WIF burned: flame orange, used for burn numbers only */
-
-  /* Type */
-  --font-display: "Bricolage Grotesque Variable", "Segoe UI", system-ui, sans-serif;
-  --font-body: "IBM Plex Sans", "Segoe UI", system-ui, sans-serif;
+  /* type: one grotesk for text, one mono for labels */
+  --font-text: "Hanken Grotesk", "Segoe UI", system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", monospace;
-  --fs-xs: 0.75rem;
-  --fs-sm: 0.86rem;
-  --fs-base: 0.98rem;
-  --fs-lg: 1.15rem;
-  --fs-xl: 1.55rem;
-  --fs-2xl: clamp(1.9rem, 1.3rem + 2.2vw, 2.8rem);
-  --fs-display: clamp(2.3rem, 1.3rem + 3.4vw, 3.9rem);
+  --fs-xs: 0.75rem; /* mono labels, tags */
+  --fs-sm: 0.875rem;
+  --fs-base: 1rem;
+  --fs-lg: 1.125rem;
+  --fs-xl: 1.5rem;
+  --fs-2xl: clamp(1.75rem, 1.2rem + 2vw, 2.5rem);
+  --fs-display: clamp(2.4rem, 1.2rem + 4.6vw, 4.6rem);
 
-  /* Space, shape, motion */
+  /* space, shape, motion */
   --sp-1: 4px;
   --sp-2: 8px;
   --sp-3: 12px;
@@ -63,31 +52,90 @@
   --sp-5: 24px;
   --sp-6: 32px;
   --sp-7: 48px;
-  --radius-sm: 10px;
-  --radius: 16px;
-  --radius-lg: 24px;
-  --shadow: 0 1px 0 rgba(255, 255, 255, 0.04) inset, 0 18px 40px -24px rgba(0, 0, 0, 0.7);
+  --sp-8: 72px;
+  --radius-sm: 8px;
+  --radius: 12px;
+  --radius-cell: 4px;
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
-  --mood-duration: 1.4s;
+  --tap: 44px;
+  color-scheme: dark;
+
+  /* default surface = dark section */
+  --bg: var(--ink-950);
+  --surface: var(--ink-900);
+  --surface-2: var(--ink-850);
+  --fg: var(--text-dark);
+  --muted: var(--muted-dark);
+  --line: var(--line-dark);
+  --line-strong: var(--line-dark-strong);
+  --accent-text: var(--coral);
+  --ok-text: var(--mint);
+  --link: var(--lilac);
+  --focus: var(--coral);
+
+  /* order and status colours (dark default; light sections override) */
+  --armed: var(--lilac);
+  --queued: #9ba6f2;
+  --executing: var(--coral);
+  --filled: var(--mint);
+  --expired: #8a8eb3;
+  --error: var(--rose);
+  --burn: var(--coral);
+}
+
+.section-dark {
+  --bg: var(--ink-950);
+  --surface: var(--ink-900);
+  --surface-2: var(--ink-850);
+  --fg: var(--text-dark);
+  --muted: var(--muted-dark);
+  --line: var(--line-dark);
+  --line-strong: var(--line-dark-strong);
+  --accent-text: var(--coral);
+  --ok-text: var(--mint);
+  --link: var(--lilac);
+  --focus: var(--coral);
+  --armed: var(--lilac);
+  --queued: #9ba6f2;
+  --executing: var(--coral);
+  --filled: var(--mint);
+  --expired: #8a8eb3;
+  --error: var(--rose);
+  --burn: var(--coral);
   color-scheme: dark;
 }
 
-/* After hours: the same room at night. */
-:root[data-session="closed"] {
-  --bg: #0c0f17;
-  --bg-glow: rgba(183, 166, 255, 0.1);
-  --surface: #131826;
-  --surface-2: #1a2031;
-  --surface-3: #222a3e;
-  --line: #262e44;
-  --line-strong: #39435f;
-  --text: #ecebf5;
-  --text-2: #c6c5d8;
-  --muted: #9a99b3;
+.section-ink {
+  /* the slightly lighter dark band, for alternating dark sections */
+  --bg: var(--ink-900);
+  --surface: var(--ink-850);
+  --surface-2: var(--ink-800);
+}
+
+.section-light {
+  --bg: var(--cream);
+  --surface: var(--paper);
+  --surface-2: var(--cream-2);
+  --fg: var(--text-light);
+  --muted: var(--muted-light);
+  --line: var(--line-light);
+  --line-strong: var(--line-light-strong);
+  --accent-text: var(--coral-deep);
+  --ok-text: var(--mint-deep);
+  --link: var(--lilac-deep);
+  --focus: var(--ink-950);
+  --armed: var(--lilac-deep);
+  --queued: #3f4aa8;
+  --executing: var(--coral-deep);
+  --filled: var(--mint-deep);
+  --expired: #5e6285;
+  --error: var(--rose-deep);
+  --burn: var(--coral-deep);
+  color-scheme: light;
 }
 
 @media (prefers-reduced-motion: reduce) {
   :root {
-    --mood-duration: 0s;
+    --motion: 0;
   }
 }
