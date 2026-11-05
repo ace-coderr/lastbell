@@ -60,8 +60,10 @@ Web build settings: `VITE_LASTBELL_ADDRESS` (contract), `VITE_KEEPER_URL` (keepe
 Run each command in its own terminal from `contracts/`:
 
 ```bash
-npx hardhat node
+npx hardhat node --network hardhatLocal
 ```
+
+The `hardhatLocal` network starts at the real current time. Tests use the default network, which starts at a fixed date (1 Nov 2026) so they never depend on the real clock.
 
 ```bash
 npx hardhat run --network localhost scripts/local/deploy.ts

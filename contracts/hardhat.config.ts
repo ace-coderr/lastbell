@@ -11,7 +11,12 @@ export default defineConfig({
     },
   },
   networks: {
-    hardhatMainnet: { type: "edr-simulated", chainType: "l1" },
+    // The default network (what `hardhat test` and `network.create()` use): a fixed start date, so fixtures that
+    // jump to calendar dates never depend on the real clock.
+    default: { type: "edr-simulated", chainType: "l1", initialDate: "2026-11-01T00:00:00Z" },
+    hardhatMainnet: { type: "edr-simulated", chainType: "l1", initialDate: "2026-11-01T00:00:00Z" },
+    // `hardhat node` for the local click-through: starts at the real current time.
+    hardhatLocal: { type: "edr-simulated", chainType: "l1" },
     // `npx hardhat node`, for the local click-through test (scripts/local).
     localhost: { type: "http", chainType: "l1", url: "http://127.0.0.1:8545" },
     // Read-only (no account): used for `hardhat verify` so verification never needs a key.
