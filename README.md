@@ -41,6 +41,16 @@ _To be written._ Keepers lock a $WIF bond. Users prepay fees in $WIF. Each fee i
 | Every transaction | [docs/TRANSACTIONS.md](docs/TRANSACTIONS.md) |
 | Contract audit | [docs/AUDIT.md](docs/AUDIT.md) |
 
+## Screenshots
+
+| Trade | Orders | Flywheel |
+| --- | --- | --- |
+| ![Trade screen](docs/screenshots/desktop-trade.png) | ![Orders screen](docs/screenshots/desktop-orders.png) | ![Flywheel screen](docs/screenshots/desktop-flywheel.png) |
+
+The same screens work on a phone:
+
+<img src="docs/screenshots/phone-trade.png" alt="Trade screen on a phone" width="260">
+
 ## Develop
 
 Requires Node 22+.

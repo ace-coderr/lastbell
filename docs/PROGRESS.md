@@ -25,4 +25,4 @@ Submissions close 12 Nov 2026, 17:30 UTC. Target submit 10 Nov. Feature freeze 9
 - [x] U7. States
 - [x] U8. Mobile (390 and 768) and accessibility
 - [x] U9. Tests, build scan, screenshots (then stop and ask before redeploying)
-- [ ] U10. After approval: redeploy, check live, README screenshots
+- [x] U10. After approval: redeploy, check live, README screenshots
