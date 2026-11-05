@@ -1,7 +1,7 @@
 import { UNISWAP_V3, robinhoodChain } from "@lastbell/shared";
 import { createPublicClient, createWalletClient, http, isAddress, type Address, type PublicClient } from "viem";
-import { privateKeyToAccount } from "viem/accounts";
 import { errorText, runOnce, type RunReport } from "./engine.js";
+import { readKeeperKey } from "./key.js";
 import { readStatus } from "./markets.js";
 import { readContractStatus } from "./status.js";
 
@@ -42,8 +42,11 @@ const publicClient = (env: Env) =>
 const lastbellAddress = (env: Env): Address | undefined =>
   env.LASTBELL_ADDRESS && isAddress(env.LASTBELL_ADDRESS) ? env.LASTBELL_ADDRESS : undefined;
 
-const keeperAccount = (env: Env) =>
-  env.KEEPER_PRIVATE_KEY ? privateKeyToAccount(env.KEEPER_PRIVATE_KEY as `0x${string}`) : undefined;
+const keeperKey = (env: Env) => readKeeperKey(env.KEEPER_PRIVATE_KEY);
+const keeperAccount = (env: Env) => {
+  const k = keeperKey(env);
+  return k && "account" in k ? k.account : undefined;
+};
 
 const json = (body: unknown, status = 200, maxAge = 0) =>
   new Response(JSON.stringify(body, (_, v) => (typeof v === "bigint" ? v.toString() : v), 2), {
@@ -131,11 +134,12 @@ export default {
     const minute = new Date(controller.scheduledTime).getUTCMinutes();
     const at = new Date(controller.scheduledTime).toISOString();
     const lastbell = lastbellAddress(env);
-    const account = keeperAccount(env);
+    const key = keeperKey(env);
+    const account = key && "account" in key ? key.account : undefined;
     const wantSnapshot = minute % STATUS_REFRESH_MINUTES === 0;
 
     if (!lastbell || !account) {
-      const missing = [!lastbell && "LASTBELL_ADDRESS", !account && "KEEPER_PRIVATE_KEY"].filter(Boolean) as string[];
+      const missing = [!lastbell && "LASTBELL_ADDRESS", !account && (key && "problem" in key ? key.problem : "KEEPER_PRIVATE_KEY")].filter(Boolean) as string[];
       console.log(`not configured: missing ${missing.join(", ")}`);
       await record(env, { ok: false, at, configured: false, missing }, minute);
       if (wantSnapshot) await refreshSnapshot(env);
