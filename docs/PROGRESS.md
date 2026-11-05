@@ -13,3 +13,16 @@ Submissions close 12 Nov 2026, 17:30 UTC. Target submit 10 Nov. Feature freeze 9
 - [ ] 9. Audit + SECURITY.md
 - [ ] 10. Submission pack: README, docs/DEMO-PATH.md
 - [ ] 11. Final checks (10 Nov)
+
+## UI redesign (feature freeze 9 Nov)
+
+- [x] U1. UI audit: [UI-AUDIT.md](UI-AUDIT.md)
+- [ ] U2. Favicon, brand, share image
+- [ ] U3. Navbar and design tokens
+- [ ] U4. Trade page: landing, bento, stats, footer
+- [ ] U5. Orders and Flywheel re-skin
+- [ ] U6. Motion layer
+- [ ] U7. States
+- [ ] U8. Mobile (390 and 768) and accessibility
+- [ ] U9. Tests, build scan, screenshots (then stop and ask before redeploying)
+- [ ] U10. After approval: redeploy, check live, README screenshots
