@@ -11,7 +11,7 @@ export interface Env {
   /**
    * Secret: a private RPC endpoint (for example an Alchemy URL containing an API key), set with
    * `wrangler secret put RPC_URL_PRIVATE`. Preferred over RPC_URL: the public RPC is rate-limited per IP,
-   * Cloudflare egress addresses are shared, and Robinhood's docs say not to use it in production.
+   * Cloudflare egress addresses are shared, and Robinhood Chain's docs say not to use it in production.
    */
   RPC_URL_PRIVATE?: string;
   /** Lastbell contract. Until set the keeper reports "not configured". */

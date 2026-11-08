@@ -51,7 +51,7 @@ More orders mean more fees, more burn and more keeper income, which pulls in mor
 | [`contracts/`](contracts) | Solidity (Hardhat 3, viem): escrow, gate, keeper registry, fee split | Robinhood Chain |
 | [`keeper/`](keeper) | Order executor and public `/status` | Cloudflare Worker, 1-minute cron |
 | [`web/`](web) | React app (Trade, Orders, Flywheel) and the region-notice Function | Cloudflare Pages |
-| [`shared/`](shared) | Chain config, verified addresses, market hours, the freshness gate | used by keeper and web |
+| [`shared/`](shared) | Robinhood Chain config, verified addresses, market hours, the freshness gate | used by keeper and web |
 
 Docs: [CONTRACTS](docs/CONTRACTS.md), [KEEPER](docs/KEEPER.md), [DEPLOY](docs/DEPLOY.md), [DEMO-PATH](docs/DEMO-PATH.md), [UI audit](docs/UI-AUDIT.md), [feasibility](docs/FEASIBILITY.md).
 
@@ -65,6 +65,19 @@ Docs: [CONTRACTS](docs/CONTRACTS.md), [KEEPER](docs/KEEPER.md), [DEPLOY](docs/DE
 | Security | [SECURITY.md](SECURITY.md) |
 | Contract audit | [docs/AUDIT.md](docs/AUDIT.md) |
 | Keeper and web audit | [docs/AUDIT-KEEPER-WEB.md](docs/AUDIT-KEEPER-WEB.md) |
+
+## Try it as a judge
+
+About 10 minutes and roughly **0.0003 ETH** (under a dollar), on real Robinhood Chain. Nothing here needs our help, and you can cancel your order at any time.
+
+1. **Wallet.** Use a browser wallet such as MetaMask or Rabby. Open https://lastbell-cyk.pages.dev, click **Connect wallet**, and if it says your wallet is on another network, click **Switch to Robinhood Chain** (chain ID 4663, RPC `https://rpc.mainnet.chain.robinhood.com`; the wallet will offer to add it).
+2. **ETH for gas and swaps.** Bridge about 0.0003 ETH to Robinhood Chain with [Relay](https://relay.link/bridge/robinhood), [Across](https://across.to/?to=robinhood) or the [Arbitrum bridge](https://portal.arbitrum.io/bridge?destinationChain=robinhood-chain&sourceChain=ethereum). Fees on the source chain can exceed an amount this small, so pick the cheapest route.
+3. **A tiny amount of NVDA.** On [Uniswap](https://app.uniswap.org) (network: Robinhood Chain), swap about **0.0001 ETH for NVDA**. That buys roughly 0.001 NVDA (about $0.20), which is plenty. Check the token address on the swap screen: the NVDA Stock Token is the one in [`shared/src/markets.ts`](shared/src/markets.ts).
+4. **A little $WIF.** On Uniswap swap about **0.00003 ETH for WIF** (about 40 WIF, enough for one order at the 20 WIF minimum fee). Paste `0x5173b8ea6923c2d40267890d45c46a3480954773` into the token search and check it reads **WIF**. Most other WIF pools are nearly empty, so if the quote is far below about 1,500 WIF per 0.001 ETH, stop and pick a different pool.
+5. **Place a small stop-loss.** On the Trade screen click **NVDA**, set the amount to **0.001**, and the trigger a little **above** the live price (for example +1%) so it is already triggered. Check that **Would it fire right now?** shows four ticks, then click **Place stop-loss** and confirm in your wallet. You will see up to three prompts: approve NVDA, approve $WIF (both for the exact amount), then place.
+6. **Watch the keeper fill it.** Open **Orders**. The card moves from **Watching** to **Triggered** to **Filled**, usually within a couple of minutes, and a **Fill tx** link opens the transaction. The Flywheel screen shows the burn. The keeper's public log is at **https://lastbell-keeper.plumbline-app.workers.dev/status** (open orders by state, the keeper's bond and its latest run).
+
+If the market is closed (the chip at the top says so), the order is accepted and shows **queued until the market opens**. That is the point of the product: it does not fire on a frozen price, and it fills after the next open. Order 1 on mainnet is exactly that case. If your region is restricted the site turns order creation off but still lets you look around.
 
 ## Transactions on Robinhood Chain
 
@@ -81,8 +94,11 @@ Every mainnet transaction, with notes, is in [docs/TRANSACTIONS.md](docs/TRANSAC
 | Order 0: place (0.0001 NVDA stop-loss) | [`0xa22fa59366dda3bbe07381b92a15f91819841a97394a0c1ae300e45b401f65e2`](https://robinhoodchain.blockscout.com/tx/0xa22fa59366dda3bbe07381b92a15f91819841a97394a0c1ae300e45b401f65e2) |
 | Order 0: keeper claims | [`0x2952bf0257c6277ac6743f1494111dca7470ade939ae78629d0ade467f0f78bb`](https://robinhoodchain.blockscout.com/tx/0x2952bf0257c6277ac6743f1494111dca7470ade939ae78629d0ade467f0f78bb) |
 | Order 0: keeper fills (10 WIF burned, 10 WIF to the keeper) | [`0x8c0e99caed66ccc09104064f5702e021c05740dd2eb9b9fcdb67c878154e1a90`](https://robinhoodchain.blockscout.com/tx/0x8c0e99caed66ccc09104064f5702e021c05740dd2eb9b9fcdb67c878154e1a90) |
+| Order 1: approve NVDA | [`0xaee45f407aa6eb346ee08f3eb00771a62fd0905f86fcd11e87d4ce1d366e517c`](https://robinhoodchain.blockscout.com/tx/0xaee45f407aa6eb346ee08f3eb00771a62fd0905f86fcd11e87d4ce1d366e517c) |
+| Order 1: approve WIF | [`0xcd88904c4ac78fb5a8288b619e0025398374bd639289823992bcac08619cb7ee`](https://robinhoodchain.blockscout.com/tx/0xcd88904c4ac78fb5a8288b619e0025398374bd639289823992bcac08619cb7ee) |
+| Order 1: place (0.0001 NVDA stop-loss at $182.59, placed on a Sunday, queued until the market opens) | [`0x1ea41b895ec6494f285fab3a436c74e3a5404e749ad1bf49a11e0eaa39391ad0`](https://robinhoodchain.blockscout.com/tx/0x1ea41b895ec6494f285fab3a436c74e3a5404e749ad1bf49a11e0eaa39391ad0) |
 
-Funding transfers into the two wallets are not listed. A limit buy, a cancel and a weekend order have not been run on mainnet yet. They are covered by the contract tests, and place, fill and cancel were also run on a local chain.
+Funding transfers into the two wallets are not listed. Order 1 is a weekend order: it was placed on a Sunday with the market closed, and it waits as **queued until market open**, which is the point of the product. A limit buy and a cancel have not been run on mainnet yet. They are covered by the contract tests, and place, fill and cancel were also run on a local chain.
 
 ## Screenshots
 

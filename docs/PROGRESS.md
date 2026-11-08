@@ -9,7 +9,7 @@ Submissions close 12 Nov 2026, 17:30 UTC. Target submit 10 Nov. Feature freeze 9
 - [x] 5. Keeper: Cloudflare Worker, 1-minute cron, public `/status`. Pre-claim quote check, KV run log. See [KEEPER.md](KEEPER.md). Deploy pending task 8 (needs your Cloudflare login + keeper key)
 - [x] 6. Web app: three screens (Trade, Orders, Flywheel) with day/night market mood; wallet + wrong-network switch; exact approvals, place, cancel/refund with plain-English errors; armed / queued / executing / filled / expired / error states; live market clock; burn + keeper dashboard. Seeded demo mode. Verified with real transactions on a local chain (place → keeper fill → filled; error; cancel)
 - [x] 7. Region notice: Pages Function middleware stamps `request.cf.country` on the HTML (`private, no-store`); blocked or unknown (Tor/XX/unstamped production page) → blocking notice + order creation off; cancel and refunds always stay available. Verified locally with `wrangler pages dev`
-- [ ] 8. Mainnet deploy (v2, audited, verified), keeper Worker, site, first real order filled by the keeper on chain: [TRANSACTIONS.md](TRANSACTIONS.md). Remaining: a limit buy, a cancel, and a weekend order
+- [ ] 8. Mainnet deploy (v2, audited, verified), keeper Worker, site, first real order filled by the keeper on chain: [TRANSACTIONS.md](TRANSACTIONS.md). Order 1 (weekend, queued until open) placed 8 Nov. Remaining: a limit buy and a cancel
 - [x] 9. Audit + SECURITY.md: [AUDIT.md](AUDIT.md), [AUDIT-KEEPER-WEB.md](AUDIT-KEEPER-WEB.md), [SECURITY.md](../SECURITY.md)
 - [x] 10. Submission pack: README, [DEMO-PATH.md](DEMO-PATH.md)
 - [ ] 11. Final checks (10 Nov)

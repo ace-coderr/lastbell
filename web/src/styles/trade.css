@@ -749,3 +749,28 @@
     animation: none;
   }
 }
+
+/* every statistic names its source and period */
+.stat-src {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.45;
+  letter-spacing: 0.02em;
+  color: var(--muted);
+  opacity: 0.9;
+}
+.stat-src-top {
+  display: block;
+  margin-bottom: var(--sp-3);
+}
+.stat-tile .stat-src {
+  margin-top: 2px;
+}
+.data-note {
+  max-width: 1040px;
+  margin: var(--sp-3) auto 0;
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  line-height: 1.5;
+  color: var(--muted);
+}

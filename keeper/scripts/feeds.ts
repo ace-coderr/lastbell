@@ -1,4 +1,4 @@
-// Lists every Stock Token feed in Chainlink's Robinhood directory with live on-chain state.
+// Lists every Stock Token feed in Chainlink's Robinhood Chain directory with live on-chain state.
 // Usage: npm run spike:feeds -w keeper
 import { readFileSync } from "node:fs";
 import { formatUnits, parseAbi, type Address } from "viem";

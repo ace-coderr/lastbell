@@ -2,13 +2,13 @@
 
 Read-only investigation of Robinhood Chain mainnet. Snapshot taken at block `103775309` (Sunday 1 Nov 2026, 23:45 UTC, markets closed). Every number below came from an RPC call, the Chainlink reference data directory, Blockscout or the official docs at that time. Raw data is in [`data/feasibility-snapshot.json`](data/feasibility-snapshot.json).
 
-## 1. Chain facts (verified)
+## 1. Robinhood Chain facts (verified)
 
 | Fact | Value | How verified |
 |---|---|---|
 | Chain ID | `4663` (`0x1237`) | `eth_chainId` on `https://rpc.mainnet.chain.robinhood.com` |
 | Explorer | `robinhoodchain.blockscout.com` | live; its API sits behind a Cloudflare check, so it works in a browser but not from `curl` |
-| Stack | Arbitrum Orbit L2, ETH for gas | Uniswap + Robinhood docs |
+| Stack | Arbitrum Orbit L2, ETH for gas | Uniswap + Robinhood Chain docs |
 | Public RPC limits | 10M blocks per `eth_getLogs`, one topic value per position for wide ranges, max 10k logs per call, no archive state, rate-limited (HTTP 429) | observed |
 | Multicall3 | `0xcA11bde05977b3631167028862bE2a173976CA11` | worked for batched reads |
 | USDG (stablecoin) | `0x5fc5360D0400a0Fd4f2af552ADD042D716F1d168`, 6 decimals | docs Token Contracts page + `decimals()` |

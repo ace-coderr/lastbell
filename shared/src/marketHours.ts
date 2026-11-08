@@ -1,4 +1,4 @@
-// US equity 24/5 session model used by Chainlink's tokenized equity feeds.
+// US equity 24/5 session model used by Chainlink's Stock Token feeds.
 //
 // A trading day D (Mon-Fri, Eastern date) runs from 20:00 ET on D-1 until 20:00 ET on D.
 // So Monday's session opens Sunday 20:00 ET, and the week closes Friday 20:00 ET.

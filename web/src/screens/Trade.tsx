@@ -7,6 +7,7 @@ import { TickingNumber } from "../components/Ticking.js";
 import { localWhen, num, pct, usd, wif } from "../lib/format.js";
 import { EXPLORER_CONTRACT_URL } from "../links.js";
 import { defaultAmount } from "../lib/defaults.js";
+import { SOURCE } from "../lib/sources.js";
 import { formatCountdown } from "../lib/time.js";
 import type { FlywheelStats, OrderKind, UiMarket } from "../model.js";
 
@@ -70,6 +71,7 @@ export function TradeScreen(props: {
             </div>
             {market && <Ticket market={market} clock={clock} now={now} action={props.action} minFeeWif={props.minFeeWif ?? DEFAULT_MIN_FEE_WIF} />}
           </div>
+          <p className="data-note">{SOURCE.prices()}. “Pool” is the pool price against the Chainlink price.</p>
         </div>
       </section>
 
@@ -158,11 +160,11 @@ function Reveal({ className, children }: { className?: string; children: ReactNo
 
 function StatTiles({ stats, markets }: { stats?: FlywheelStats; markets: UiMarket[] }) {
   const live = markets.filter((m) => m.gate === "fresh").length;
-  const tiles: { label: string; value?: number; fmt: (n: number) => string; note: string }[] = [
-    { label: "Orders filled", value: stats?.fills, fmt: (n) => num(Math.round(n)), note: stats ? `of ${num(stats.orders)} placed` : "" },
-    { label: "WIF burned", value: stats ? stats.burnedFromFees + stats.slashedBurned : undefined, fmt: wif, note: "fees and slashes, gone for good" },
-    { label: "Keeper bond", value: stats?.bonded, fmt: wif, note: "locked as a promise to do the job" },
-    { label: "Markets live", value: markets.length ? live : undefined, fmt: (n) => `${Math.round(n)} of ${markets.length}`, note: "with a fresh price right now" },
+  const tiles: { label: string; value?: number; fmt: (n: number) => string; note: string; src: string }[] = [
+    { label: "Orders filled", value: stats?.fills, fmt: (n) => num(Math.round(n)), note: stats ? `orders filled, of ${num(stats.orders)} placed` : "", src: SOURCE.fills() },
+    { label: "WIF burned", value: stats ? stats.burnedFromFees + stats.slashedBurned : undefined, fmt: wif, note: "$WIF burned from fees and slashes", src: SOURCE.burned() },
+    { label: "Keeper bond", value: stats?.bonded, fmt: wif, note: "$WIF locked by keepers", src: SOURCE.bonded() },
+    { label: "Markets live", value: markets.length ? live : undefined, fmt: (n) => `${Math.round(n)} of ${markets.length}`, note: "markets with a Chainlink price updated this session", src: SOURCE.marketsLive() },
   ];
   return (
     <div className="bento bento-2 joined stat-grid">
@@ -171,6 +173,7 @@ function StatTiles({ stats, markets }: { stats?: FlywheelStats; markets: UiMarke
           <span className="label">{t.label}</span>
           {t.value === undefined ? <span className="skeleton stat-skel" aria-label="Loading" /> : <TickingNumber className="stat-value num" value={t.value} format={t.fmt} />}
           <span className="muted stat-note">{t.note}</span>
+          <span className="stat-src">{t.src}</span>
         </div>
       ))}
     </div>
@@ -214,7 +217,7 @@ function MarketCard({ m, active, onSelect, now }: { m: UiMarket; active: boolean
             <Moon size={12} /> {m.gate === "market-closed" ? "closed · price frozen" : "stale · not trusted"}
           </span>
         )}
-        <span className="muted num">pool {pct(drift)}</span>
+        <span className="muted num">pool {pct(drift)} vs oracle</span>
       </div>
       {active && <motion.span layoutId="market-glow" className="market-glow" />}
     </motion.button>

@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 import { BondSlashArt, BurnFlywheelArt } from "../components/dots.js";
 import { Flame, Moon, Shield } from "../components/icons.js";
 import { TickingNumber } from "../components/Ticking.js";
+import { SOURCE } from "../lib/sources.js";
 import { ago, compact, num, shortAddress, usd, wif } from "../lib/format.js";
 import type { FlywheelStats, UiMarket } from "../model.js";
 
@@ -30,20 +31,24 @@ export function FlywheelScreen({ stats, markets, now }: { stats: FlywheelStats; 
             <Tile label="WIF burned" icon={<Flame size={14} />}>
               <TickingNumber className="stat-value num burn-text" value={burned} format={(n) => Math.round(n).toLocaleString("en-US")} />
               <span className="muted stat-note">
-                {wif(stats.burnedFromFees)} from fees, {wif(stats.slashedBurned)} slashed
+                $WIF burned: {wif(stats.burnedFromFees)} from fees, {wif(stats.slashedBurned)} slashed
               </span>
+              <span className="stat-src">{SOURCE.burned()}</span>
             </Tile>
             <Tile label="Orders filled">
               <TickingNumber className="stat-value num" value={stats.fills} format={(n) => num(Math.round(n))} />
-              <span className="muted stat-note">of {num(stats.orders)} placed</span>
+              <span className="muted stat-note">orders filled, of {num(stats.orders)} placed</span>
+              <span className="stat-src">{SOURCE.fills()}</span>
             </Tile>
             <Tile label="Paid to keepers">
               <TickingNumber className="stat-value num" value={stats.paidToKeepers} format={wif} />
-              <span className="muted stat-note">their half of every fee</span>
+              <span className="muted stat-note">$WIF paid to keepers, their half of each fee</span>
+              <span className="stat-src">{SOURCE.paid()}</span>
             </Tile>
             <Tile label="Bonded by keepers" icon={<Shield size={14} />}>
               <TickingNumber className="stat-value num" value={stats.bonded} format={wif} />
-              <span className="muted stat-note">{wif(stats.prepaid)} of fees prepaid, not yet earned</span>
+              <span className="muted stat-note">$WIF locked by keepers; {wif(stats.prepaid)} of prepaid fees not yet earned</span>
+              <span className="stat-src">{SOURCE.bondedAndHeld()}</span>
             </Tile>
           </div>
         </div>
@@ -68,7 +73,7 @@ export function FlywheelScreen({ stats, markets, now }: { stats: FlywheelStats; 
 
           <div className="fw-split" aria-label="Where fees have gone">
             <div className="fw-split-head">
-              <span className="label">Where fees have gone so far</span>
+              <span className="label">Where fees have gone, all time</span>
               <span className="num">{wif(fees)}</span>
             </div>
             <div className="fee-bar">
@@ -83,6 +88,7 @@ export function FlywheelScreen({ stats, markets, now }: { stats: FlywheelStats; 
                 <Shield size={13} /> {wif(stats.paidToKeepers)} to keepers
               </span>
             </div>
+            <span className="stat-src">{SOURCE.feeSplit()}</span>
           </div>
         </div>
       </section>
@@ -137,6 +143,7 @@ export function FlywheelScreen({ stats, markets, now }: { stats: FlywheelStats; 
                   </table>
                 </div>
               )}
+              <span className="stat-src">{SOURCE.keepers()}. Cron status: the keeper's public /status page, latest run.</span>
               {stats.lastRun && <p className="fine muted">Last run: {stats.lastRun.summary}</p>}
             </div>
 
@@ -170,6 +177,7 @@ export function FlywheelScreen({ stats, markets, now }: { stats: FlywheelStats; 
           </div>
           <div className="fw-gates">
             <div className="cell cell-pad">
+              <span className="stat-src stat-src-top">{SOURCE.gates()}</span>
               <ul className="gates">
                 {markets.map((m) => (
                   <li key={m.symbol}>
