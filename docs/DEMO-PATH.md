@@ -13,7 +13,7 @@ Three screens, in this order, about 90 seconds. Everything below uses what is on
 The pitch: an order that only fires on a real price.
 
 1. Open https://lastbell-cyk.pages.dev. Point at the headline, **Stop-losses that sleep when the market sleeps**, and the chip at the top right: **Market open · closes in …**.
-2. Click the **NVDA** card. The amount opens on a few dollars (**0.05 NVDA**) and the trigger is filled in 3% below the price. Each card says **fresh this session**.
+2. Click the **NVDA** card. The amount opens on a few dollars (**0.05 NVDA**) and the trigger is filled in 3% below the price. While the market is open each card says **fresh this session**; outside the session it says **closed · price frozen**, and the second step of the checklist below will not tick.
 3. Click the **-5%** chip under the trigger. The sentence under the form rewrites itself.
 4. Point at the fee bar: **half burned forever, half to the keeper**, and the line **Keeper fee, prepaid in $WIF**.
 5. Point at **Would it fire right now?** and let the four checks resolve one by one: market session, fresh Chainlink price, pool agrees with oracle, trigger reached. The verdict reads **Not yet, it waits**.

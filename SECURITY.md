@@ -66,4 +66,4 @@ F1 and F2 led to a redeploy: the first contract was deployed and verified, then 
 
 ## Reporting a problem
 
-Please use GitHub's private vulnerability reporting on [the repository](https://github.com/ace-coderr/lastbell/security/advisories/new), or open an issue for anything that is not sensitive. There is no bounty. If you find a way to lose funds, please tell us first.
+Please [open an issue](https://github.com/ace-coderr/lastbell/issues/new) on the repository. If it is sensitive, say only that you have a security report and do not post details; we will agree a private way to receive it. There is no bounty. If you find a way to lose funds, please tell us first.
