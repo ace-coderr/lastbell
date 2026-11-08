@@ -1,4 +1,5 @@
 import { gateStatusOf, lastbellAbi, quoterV2Abi, type GateStatus } from "@lastbell/shared";
+import { PAGE, scanPlan } from "./scan.js";
 import {
   BaseError,
   ContractFunctionRevertedError,
@@ -64,12 +65,13 @@ export interface Snapshot {
   keeper: { address: Address; bond: bigint; activeClaims: number; capacity: bigint; active: boolean };
   markets: MarketSnap[];
   open: OrderSnap[];
+  /** False when there were more orders than one run reads; the rest are covered by later runs. */
+  scanComplete: boolean;
 }
 
 const OPEN = 1;
-const PAGE = 200n;
 
-export async function readSnapshot(client: PublicClient, cfg: EngineConfig, keeper: Address): Promise<Snapshot> {
+export async function readSnapshot(client: PublicClient, cfg: EngineConfig, keeper: Address, round = 0): Promise<Snapshot> {
   const c = { address: cfg.lastbell, abi: lastbellAbi } as const;
   const [block, count, marketCount, claimWindow, quote, k, capacity, active] = await Promise.all([
     client.getBlock(),
@@ -93,12 +95,14 @@ export async function readSnapshot(client: PublicClient, cfg: EngineConfig, keep
   );
 
   const open: OrderSnap[] = [];
-  for (let from = 0n; from < count; from += PAGE) {
-    const page = await client.readContract({ ...c, functionName: "getOrders", args: [from, PAGE] });
+  const scan = scanPlan(count, round);
+  const pages = await Promise.all(scan.starts.map((from) => client.readContract({ ...c, functionName: "getOrders", args: [from, PAGE] })));
+  pages.forEach((page, p) => {
+    const from = scan.starts[p]!;
     page.forEach((o, i) => {
       if (o.status === OPEN) open.push({ id: from + BigInt(i), ...o } as OrderSnap);
     });
-  }
+  });
 
   return {
     now: Number(block.timestamp),
@@ -108,6 +112,7 @@ export async function readSnapshot(client: PublicClient, cfg: EngineConfig, keep
     keeper: { address: keeper, bond: k[0], activeClaims: Number(k[1]), capacity, active },
     markets,
     open,
+    scanComplete: scan.complete,
   };
 }
 
@@ -184,6 +189,8 @@ export interface RunReport {
   block: string;
   keeper: Address;
   open: number;
+  /** False when the order list is longer than one run reads (see scan.ts). */
+  scanComplete: boolean;
   results: ActionResult[];
   skipped: Plan["skipped"];
   durationMs: number;
@@ -261,9 +268,9 @@ async function poolCanFill(publicClient: PublicClient, cfg: EngineConfig, s: Sna
   }
 }
 
-export async function runOnce(publicClient: PublicClient, wallet: Wallet, cfg: EngineConfig): Promise<RunReport> {
+export async function runOnce(publicClient: PublicClient, wallet: Wallet, cfg: EngineConfig, round = 0): Promise<RunReport> {
   const started = Date.now();
-  const s = await readSnapshot(publicClient, cfg, wallet.account.address);
+  const s = await readSnapshot(publicClient, cfg, wallet.account.address, round);
   const p = plan(s, cfg);
   const results: ActionResult[] = [];
 
@@ -307,6 +314,7 @@ export async function runOnce(publicClient: PublicClient, wallet: Wallet, cfg: E
     block: s.block.toString(),
     keeper: s.keeper.address,
     open: s.open.length,
+    scanComplete: s.scanComplete,
     results,
     skipped: p.skipped,
     durationMs: Date.now() - started,

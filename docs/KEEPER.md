@@ -4,7 +4,7 @@ A Cloudflare Worker ([`keeper/`](../keeper)) with a Cron Trigger every minute. I
 
 ## Each run
 
-1. **Snapshot.** One pass over the contract: the block, every market's `gate()`, all open orders, and the keeper's bond, live claims and capacity.
+1. **Snapshot.** One pass over the contract: the block, every market's `gate()`, the open orders and the keeper's bond, live claims and capacity. At most 15 pages of 200 orders are read per run; a longer list is read in a window that moves on each minute, so every order is still visited (see [AUDIT-KEEPER-WEB.md](AUDIT-KEEPER-WEB.md)).
 2. **Plan.** A pure function ([`engine.ts`](../keeper/src/engine.ts) `plan`, unit-tested):
    - finish its own live claims first (only if the gate is fresh);
    - claim triggered orders on a fresh gate, highest fee first, never beyond `bond / slashAmount`;
@@ -19,7 +19,7 @@ The contract re-checks everything, so a buggy or malicious keeper can only fail 
 
 ## `GET /status`
 
-Public JSON, cached at the edge for 5 s:
+Public JSON, cached at the edge for 20 s, one entry whatever the query string, with the RPC URL, keys and URL paths scrubbed from everything it serves:
 - the market clock and per-market gate (status, oracle price, pool price);
 - contract totals: fills, $WIF burned from fees, $WIF paid to keepers, $WIF slashed, bonded and prepaid;
 - open orders by state (`armed`, `queued:<reason>`, `executing`, `expired`);

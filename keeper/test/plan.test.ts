@@ -48,6 +48,7 @@ const snap = (open: OrderSnap[], over: Partial<Snapshot> = {}): Snapshot => ({
   keeper: { address: ME, bond: 10n ** 23n, activeClaims: 0, capacity: 10n, active: true },
   markets: [market()],
   open,
+  scanComplete: true,
   ...over,
 });
 

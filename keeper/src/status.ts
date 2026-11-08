@@ -47,7 +47,7 @@ export async function readContractStatus(client: PublicClient, lastbell: Address
       wifBonded: wif(bonded),
       wifPrepaidFees: wif(feeHeld),
     },
-    openOrders: { total: s.open.length, byState: states },
+    openOrders: { total: s.open.length, byState: states, scanComplete: s.scanComplete },
     keeper: keeper
       ? {
           address: keeper,

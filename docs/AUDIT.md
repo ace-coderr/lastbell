@@ -34,7 +34,7 @@ Contract size after the fixes: 19,168 bytes (limit 24,576). No new privileges: t
 - **Issuer powers are outside our control:** it can pause transfers, blocklist addresses, burn tokens from any address (including the escrow) and upgrade the token. Escrow is accounted per order, but an issuer burn from the contract would leave the last claimants short.
 - **A fill still needs the pool.** An order that the pool cannot fill (thin liquidity) stays executing until it expires; the owner can always cancel.
 - **$WIF liquidity is thin.** Bond and fee sizes are small on purpose.
-- **Spam is cheap.** Orders are refundable, so someone can create thousands for gas alone. The contract is unaffected (paginated reads), but the off-chain keeper must bound its scan; tracked for the keeper audit.
+- **Spam is cheap.** Orders are refundable, so someone can create thousands for gas alone. The contract is unaffected (paginated reads), and the off-chain keeper bounds its scan (finding KW1 in [AUDIT-KEEPER-WEB.md](AUDIT-KEEPER-WEB.md)).
 - Not formally verified, and no third-party audit. Treat it as hackathon-grade.
 
 ## Tests
